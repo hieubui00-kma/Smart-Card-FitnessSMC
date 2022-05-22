@@ -12,7 +12,7 @@ public class FitnessSMC {
         try {
             List<CardTerminal> terminals = factory.terminals().list();
             CardTerminal terminal = terminals.get(0);
-            Card card = terminal.connect("T=0");
+            Card card = terminal.connect("*");
             CardChannel channel = card.getBasicChannel();
             CommandAPDU selectCommand = new CommandAPDU(0, 164, 4, 0, AID);
             ResponseAPDU response = channel.transmit(selectCommand);
