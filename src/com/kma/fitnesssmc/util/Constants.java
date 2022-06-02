@@ -7,4 +7,10 @@ public class Constants {
     public static final int HEIGHT_FRAME = 600;
 
     public static final byte[] AID = new byte[]{0x66, 0x69, 0x74, 0x6E, 0x65, 0x73, 0x73, 0x73, 0x6D, 0x63, 0x00};
+
+    public static final int INS_CREATE_MEMBER = 0x00;
+    public static final int INS_GET_MEMBER = 0x02;
+    public static final int INS_UPDATE_MEMBER = 0x03;
+
+    public static final int P1_PROFILE = 0x00;
 }
