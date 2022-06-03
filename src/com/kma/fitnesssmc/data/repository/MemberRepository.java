@@ -61,7 +61,11 @@ public class MemberRepository {
         }
     }
 
-    private @NotNull Member parseMemberData(byte[] data) throws ParseException {
+    private @Nullable Member parseMemberData(byte[] data) throws ParseException {
+        if (data.length < 1) {  // Data is empty because member isn't initialized
+            return null;
+        }
+
         Member member = new Member();
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         int offset = 0;

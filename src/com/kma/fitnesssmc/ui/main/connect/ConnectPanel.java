@@ -1,13 +1,16 @@
 package com.kma.fitnesssmc.ui.main.connect;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
+import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 
 import javax.swing.*;
-
 import java.awt.*;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class ConnectPanel extends JPanel {
     private final JLabel labelTitle = new JLabel("FITNESS SMART CARD");
@@ -18,12 +21,16 @@ public class ConnectPanel extends JPanel {
 
     private final JButton btnConnect = new JButton("Connect");
 
+    private ConnectViewModel viewModel;
+
     public ConnectPanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -33,6 +40,12 @@ public class ConnectPanel extends JPanel {
         setupConnectButton();
 
         setEvents();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new ConnectViewModel(sessionManager, memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -94,6 +107,21 @@ public class ConnectPanel extends JPanel {
     }
 
     private void connect() {
+        String pin = new String(fieldPin.getPassword());
+        String errorMessage = viewModel.connect(pin);
 
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+
+        if (viewModel.getMember() == null) {    // Member isn't initialized
+            mainFrame.navigateToCreateMember();
+            return;
+        }
+
+        mainFrame.navigateToHome();
     }
 }
