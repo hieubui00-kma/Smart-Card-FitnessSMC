@@ -1,5 +1,7 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import com.kma.fitnesssmc.ui.main.component.TextField;
@@ -37,12 +39,16 @@ public class CreateMemberPanel extends JPanel {
 
     private final JButton btnSubmit = new JButton("Submit");
 
+    private CreateMemberViewModel viewModel;
+
     public CreateMemberPanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -57,6 +63,12 @@ public class CreateMemberPanel extends JPanel {
         setupSubmitButton();
 
         setEvents();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new CreateMemberViewModel(memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -160,7 +172,7 @@ public class CreateMemberPanel extends JPanel {
         fieldPhoneNumber.setBounds(datePicker.getX(), y + labelPhoneNumber.getHeight() + 8, width, 32);
         fieldPhoneNumber.setFont(new Font("Arial", Font.PLAIN, 14));
         fieldPhoneNumber.setMaxLength(10);
-        fieldPhoneNumber.setDigits(new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
+        fieldPhoneNumber.setDigits(new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
         fieldPhoneNumber.setBorder(BorderFactory.createCompoundBorder(
             fieldPhoneNumber.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)
@@ -186,7 +198,7 @@ public class CreateMemberPanel extends JPanel {
         fieldNewPin.setBounds(fieldPhoneNumber.getX(), y + labelNewPin.getHeight() + 8, width, 32);
         fieldNewPin.setFont(new Font("Arial", Font.PLAIN, 14));
         fieldNewPin.setMaxLength(6);
-        fieldNewPin.setDigits(new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
+        fieldNewPin.setDigits(new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
         fieldNewPin.setBorder(BorderFactory.createCompoundBorder(
             fieldNewPin.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)
@@ -212,7 +224,7 @@ public class CreateMemberPanel extends JPanel {
         fieldConfirmNewPin.setBounds(fieldNewPin.getX(), y + labelConfirmNewPin.getHeight() + 8, width, 32);
         fieldConfirmNewPin.setFont(new Font("Arial", Font.PLAIN, 14));
         fieldConfirmNewPin.setMaxLength(6);
-        fieldConfirmNewPin.setDigits(new char[] {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
+        fieldConfirmNewPin.setDigits(new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
         fieldConfirmNewPin.setBorder(BorderFactory.createCompoundBorder(
             fieldConfirmNewPin.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)
@@ -248,6 +260,9 @@ public class CreateMemberPanel extends JPanel {
 
         if (state == APPROVE_OPTION) {
             File fileAvatar = fileChooser.getSelectedFile();
+            Image avatar = viewModel.setAvatar(fileAvatar);
+
+            panelAvatar.setImage(avatar);
         }
     }
 
@@ -257,5 +272,17 @@ public class CreateMemberPanel extends JPanel {
         String phoneNumber = fieldPhoneNumber.getText();
         String newPin = new String(fieldNewPin.getPassword());
         String confirmNewPin = new String(fieldConfirmNewPin.getPassword());
+        String errorMessage = viewModel.validate(fullName, dateOfBirth, phoneNumber, newPin, confirmNewPin);
+
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (viewModel.createMember(fullName, dateOfBirth, phoneNumber, newPin)) {
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "New member creation failed!", "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
