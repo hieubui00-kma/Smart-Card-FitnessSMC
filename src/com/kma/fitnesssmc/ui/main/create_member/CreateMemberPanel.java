@@ -183,7 +183,7 @@ public class CreateMemberPanel extends JPanel {
     }
 
     private void setupNewPinField() {
-        JLabel labelNewPin = new JLabel("New Pin:");
+        JLabel labelNewPin = new JLabel("New PIN:");
         final int y = fieldPhoneNumber.getY() + fieldPhoneNumber.getHeight() + 16;
 
         // Setup New Pin label
@@ -209,7 +209,7 @@ public class CreateMemberPanel extends JPanel {
     }
 
     private void setupConfirmNewPinField() {
-        JLabel labelConfirmNewPin = new JLabel("Confirm New Pin:");
+        JLabel labelConfirmNewPin = new JLabel("Confirm New PIN:");
         final int y = fieldNewPin.getY() + fieldNewPin.getHeight() + 16;
 
         // Setup Confirm New Pin label

@@ -63,22 +63,22 @@ public class CreateMemberViewModel {
         }
 
         if (newPin == null || newPin.isBlank()) {
-            return "Enter your new pin.";
+            return "Enter your new PIN.";
         }
 
         if (newPin.length() != 6) {
-            return "New pin is invalid!";
+            return "New PIN is invalid!";
         }
 
         if (confirmNewPin == null || confirmNewPin.isBlank()) {
-            return "Enter your confirm new pin.";
+            return "Enter your confirm new PIN.";
         }
 
         if (confirmNewPin.equals(newPin)) {
             return null;
         }
 
-        return "Confirm new pin is not match!";
+        return "Confirm new PIN is not match!";
     }
 
     public boolean createMember(
