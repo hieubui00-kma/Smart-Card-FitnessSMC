@@ -1,5 +1,7 @@
 package com.kma.fitnesssmc.ui.main;
 
+import com.kma.fitnesssmc.ui.main.create_member.CreateMemberPanel;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -18,6 +20,8 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+
+        add(new CreateMemberPanel());
     }
 
     @Override
