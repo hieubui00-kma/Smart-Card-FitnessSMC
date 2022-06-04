@@ -36,7 +36,7 @@ public class MemberRepository {
         }
     }
 
-    public boolean createMember(
+    public @Nullable Member createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
         @NotNull String phoneNumber,
@@ -53,13 +53,16 @@ public class MemberRepository {
             member.setAvatar(avatar);
             member.setExpirationDate(now);
 
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, member.getProfileData());
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String nowFormatted = dateFormat.format(now);
+            String data = new String(member.getProfileData()) + (char) nowFormatted.length() + nowFormatted;
+            CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
             ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00;
+            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
         } catch (NullPointerException | CardException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 

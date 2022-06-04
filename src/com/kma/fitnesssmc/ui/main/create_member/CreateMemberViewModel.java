@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
+import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
@@ -81,13 +82,13 @@ public class CreateMemberViewModel {
         return "Confirm new PIN is not match!";
     }
 
-    public boolean createMember(
+    public @Nullable Member createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
         @NotNull String phoneNumber,
         @NotNull String newPin
     ) {
-        byte[] avatar = fileAvatar == null ? null : Bytes.fromFile(fileAvatar);
+        byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
 
         return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar, newPin);
     }

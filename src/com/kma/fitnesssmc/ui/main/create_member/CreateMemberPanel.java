@@ -280,10 +280,12 @@ public class CreateMemberPanel extends JPanel {
             return;
         }
 
-        if (viewModel.createMember(fullName, dateOfBirth, phoneNumber, newPin)) {
+        Member member = viewModel.createMember(fullName, dateOfBirth, phoneNumber, newPin);
+        if (member == null) {
+            JOptionPane.showMessageDialog(this, "New member creation failed!", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "New member creation failed!", "Error", JOptionPane.ERROR_MESSAGE);
+        System.out.println("member: " + member);
     }
 }
