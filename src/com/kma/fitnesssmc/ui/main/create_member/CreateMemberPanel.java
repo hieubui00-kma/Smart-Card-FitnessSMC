@@ -3,6 +3,7 @@ package com.kma.fitnesssmc.ui.main.create_member;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
+import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import com.kma.fitnesssmc.ui.main.component.TextField;
@@ -20,6 +21,7 @@ import java.util.Properties;
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
 import static javax.swing.JFileChooser.APPROVE_OPTION;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class CreateMemberPanel extends JPanel {
     private final JLabel labelTitle = new JLabel("CREATE NEW MEMBER");
@@ -281,11 +283,16 @@ public class CreateMemberPanel extends JPanel {
         }
 
         Member member = viewModel.createMember(fullName, dateOfBirth, phoneNumber, newPin);
-        if (member == null) {
-            JOptionPane.showMessageDialog(this, "New member creation failed!", "Error", JOptionPane.ERROR_MESSAGE);
+        if (member != null) {
+            navigateToHome();
             return;
         }
 
-        System.out.println("member: " + member);
+        JOptionPane.showMessageDialog(this, "New member creation failed!", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void navigateToHome() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToHome();
     }
 }

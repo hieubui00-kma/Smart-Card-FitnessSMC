@@ -94,7 +94,7 @@ public class ConnectPanel extends JPanel {
         final int y = fieldPin.getY() + fieldPin.getHeight() + 32;
 
         btnConnect.setBounds(x, y, width, 40);
-        btnConnect.setFont(new Font("Arial", Font.BOLD, 24));
+        btnConnect.setFont(new Font("Arial", Font.BOLD, 20));
         btnConnect.setHorizontalAlignment(SwingConstants.CENTER);
         btnConnect.setVerticalAlignment(SwingConstants.CENTER);
         btnConnect.setFocusPainted(false);
