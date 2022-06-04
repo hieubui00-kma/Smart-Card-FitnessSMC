@@ -279,7 +279,14 @@ public class HomePanel extends JPanel {
     }
 
     private void setEvents() {
+        btnProfile.addActionListener(event -> navigateToProfile());
+
         btnExit.addActionListener(event -> exit());
+    }
+
+    private void navigateToProfile() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToProfile();
     }
 
     private void exit() {
