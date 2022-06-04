@@ -31,6 +31,8 @@ public class HomePanel extends JPanel {
 
     private final JLabel labelExpirationDate = new JLabel();
 
+    private final JLabel labelRemainingBalance = new JLabel();
+
     private final JButton btnProfile = new JButton("Profile");
 
     private final JButton btnChanePIN = new JButton("Change PIN");
@@ -61,6 +63,7 @@ public class HomePanel extends JPanel {
         setupDateOfBirthLabel();
         setupPhoneNumberLabel();
         setupExpirationDateLabel();
+        setupRemainingBalanceLabel();
         setupProfileButton();
         setupChangePINButton();
         setupRechargeButton();
@@ -106,7 +109,7 @@ public class HomePanel extends JPanel {
         label.setHorizontalAlignment(SwingConstants.LEFT);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        final int x = labelX + label.getWidth() + 4;
+        final int x = labelX + label.getWidth() + 48;
         final int width = WIDTH_FRAME - 24 - x;
 
         labelMemberID.setBounds(x, labelY, width, 24);
@@ -128,10 +131,10 @@ public class HomePanel extends JPanel {
         label.setHorizontalAlignment(SwingConstants.LEFT);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        final int x = labelX + label.getWidth() + 4;
+        final int x = labelMemberID.getX();
         final int width = WIDTH_FRAME - 24 - x;
 
-        labelFullName.setBounds(x, labelY, width, 24);
+        labelFullName.setBounds(labelMemberID.getX(), labelY, width, 24);
         labelFullName.setFont(new Font("Arial", Font.BOLD, 16));
         labelFullName.setHorizontalAlignment(SwingConstants.LEFT);
         labelFullName.setVerticalAlignment(SwingConstants.CENTER);
@@ -150,7 +153,7 @@ public class HomePanel extends JPanel {
         label.setHorizontalAlignment(SwingConstants.LEFT);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        final int x = label.getX() + label.getWidth() + 4;
+        final int x = labelFullName.getX();
         final int y = label.getY();
         final int width = WIDTH_FRAME - 24 - x;
 
@@ -173,7 +176,7 @@ public class HomePanel extends JPanel {
         label.setHorizontalAlignment(SwingConstants.LEFT);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        final int x = label.getX() + label.getWidth() + 4;
+        final int x = labelDateOfBirth.getX();
         final int y = label.getY();
         final int width = WIDTH_FRAME - 24 - x;
 
@@ -196,7 +199,7 @@ public class HomePanel extends JPanel {
         label.setHorizontalAlignment(SwingConstants.LEFT);
         label.setVerticalAlignment(SwingConstants.CENTER);
 
-        final int x = label.getX() + label.getWidth() + 4;
+        final int x = labelPhoneNumber.getX();
         final int y = label.getY();
         final int width = WIDTH_FRAME - 24 - x;
 
@@ -207,6 +210,29 @@ public class HomePanel extends JPanel {
 
         add(label);
         add(labelExpirationDate);
+    }
+
+    private void setupRemainingBalanceLabel() {
+        JLabel label = new JLabel("Remaining Balance: ");
+        final int labelX = panelAvatar.getX() + panelAvatar.getWidth() + 64;
+        final int labelY = labelExpirationDate.getY() + labelExpirationDate.getHeight() + 24;
+
+        label.setBounds(labelX, labelY, 156, 24);
+        label.setFont(new Font("Arial", Font.PLAIN, 16));
+        label.setHorizontalAlignment(SwingConstants.LEFT);
+        label.setVerticalAlignment(SwingConstants.CENTER);
+
+        final int x = labelExpirationDate.getX();
+        final int y = label.getY();
+        final int width = WIDTH_FRAME - 24 - x;
+
+        labelRemainingBalance.setBounds(x, y, width, 24);
+        labelRemainingBalance.setFont(new Font("Arial", Font.BOLD, 16));
+        labelRemainingBalance.setHorizontalAlignment(SwingConstants.LEFT);
+        labelRemainingBalance.setVerticalAlignment(SwingConstants.CENTER);
+
+        add(label);
+        add(labelRemainingBalance);
     }
 
     private void setupProfileButton() {
@@ -311,5 +337,6 @@ public class HomePanel extends JPanel {
         labelDateOfBirth.setText(dateFormat.format(member.getDateOfBirth()));
         labelPhoneNumber.setText(member.getPhoneNumber());
         labelExpirationDate.setText(dateFormat.format(member.getExpirationDate()));
+        labelRemainingBalance.setText(String.format("%,d", member.getRemainingBalance()) + " VND");
     }
 }
