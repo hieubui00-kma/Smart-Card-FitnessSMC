@@ -307,12 +307,19 @@ public class HomePanel extends JPanel {
     private void setEvents() {
         btnProfile.addActionListener(event -> navigateToProfile());
 
+        btnRecharge.addActionListener(event -> navigateToRecharge());
+
         btnExit.addActionListener(event -> exit());
     }
 
     private void navigateToProfile() {
         MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
         mainFrame.navigateToProfile();
+    }
+
+    private void navigateToRecharge() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToRecharge();
     }
 
     private void exit() {

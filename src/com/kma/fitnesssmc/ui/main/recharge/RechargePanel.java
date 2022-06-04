@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.recharge;
 
+import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.TextField;
 
 import javax.swing.*;
@@ -9,6 +10,7 @@ import java.awt.event.KeyEvent;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class RechargePanel extends JPanel {
     private final JLabel labelTitle = new JLabel("RECHARGE");
@@ -132,6 +134,7 @@ public class RechargePanel extends JPanel {
     }
 
     private void navigateToHome() {
-
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToHome();
     }
 }

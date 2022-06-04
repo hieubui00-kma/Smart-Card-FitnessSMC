@@ -4,6 +4,7 @@ import com.kma.fitnesssmc.ui.main.connect.ConnectPanel;
 import com.kma.fitnesssmc.ui.main.create_member.CreateMemberPanel;
 import com.kma.fitnesssmc.ui.main.home.HomePanel;
 import com.kma.fitnesssmc.ui.main.profile.ProfilePanel;
+import com.kma.fitnesssmc.ui.main.recharge.RechargePanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,6 +58,10 @@ public class MainFrame extends JFrame {
 
     public void navigateToProfile() {
         replace(new ProfilePanel());
+    }
+
+    public void navigateToRecharge() {
+        replace(new RechargePanel());
     }
 
     public void navigateToConnect() {
