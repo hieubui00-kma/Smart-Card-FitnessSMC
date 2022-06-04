@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 import static com.kma.fitnesssmc.util.Constants.*;
 
@@ -45,9 +46,11 @@ public class MemberRepository {
         @NotNull String newPin
     ) {
         try {
+            String memberID = createMemberID();
             Date now = Calendar.getInstance().getTime();
             Member member = new Member();
 
+            member.setID(memberID);
             member.setFullName(fullName);
             member.setDateOfBirth(dateOfBirth);
             member.setPhoneNumber(phoneNumber);
@@ -56,20 +59,31 @@ public class MemberRepository {
             member.setRemainingBalance(0);
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String profileData = new String(member.getProfileData());
             String nowFormatted = dateFormat.format(now);
-            String data = new String(member.getProfileData()) + (char) nowFormatted.length() + nowFormatted;
+            String data =
+                (char) memberID.length() + memberID
+                + profileData
+                + (char) nowFormatted.length() + nowFormatted
+                + (char) newPin.length() + newPin;
+
             CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
             ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-            if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
-                return null;
-            }
-
-            return updatePin(newPin) ? member : null;
+            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
         } catch (NullPointerException | CardException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    private @NotNull String createMemberID() {
+        Random random = new Random();
+        int max = 99999999;
+        int min = 10000000;
+        int memberID = random.nextInt((max - min) + 1) + min;
+
+        return String.valueOf(memberID);
     }
 
     public @Nullable Member getMember() {
