@@ -1,5 +1,8 @@
 package com.kma.fitnesssmc.ui.main.profile;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 import com.kma.fitnesssmc.ui.main.component.TextField;
@@ -11,6 +14,8 @@ import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -41,12 +46,16 @@ public class ProfilePanel extends JPanel {
 
     private final JButton btnBack = new JButton("Back");
 
+    private ProfileViewModel viewModel;
+
     public ProfilePanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -64,6 +73,12 @@ public class ProfilePanel extends JPanel {
         setEvents();
 
         getMember();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new ProfileViewModel(memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -267,6 +282,9 @@ public class ProfilePanel extends JPanel {
 
         if (state == APPROVE_OPTION) {
             File fileAvatar = fileChooser.getSelectedFile();
+            Image avatar = viewModel.setAvatar(fileAvatar);
+
+            panelAvatar.setImage(avatar);
         }
     }
 
@@ -274,6 +292,14 @@ public class ProfilePanel extends JPanel {
         String fullName = fieldFullName.getText().trim();
         Date dateOfBirth = (Date) datePicker.getModel().getValue();
         String phoneNumber = fieldPhoneNumber.getText();
+        String errorMessage = viewModel.updateMemberProfile(fullName, dateOfBirth, phoneNumber);
+
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Update successfully!", "Error", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void navigateToHome() {
@@ -282,7 +308,20 @@ public class ProfilePanel extends JPanel {
     }
 
     private void getMember() {
+        Member member = viewModel.getMember();
 
+        if (member == null) {
+            JOptionPane.showMessageDialog(this, "Error! An error occurred. Please try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        fieldMemberID.setText(member.getID());
+        fieldFullName.setText(member.getFullName());
+        setDateOfBirth(member.getDateOfBirth());
+        fieldPhoneNumber.setText(member.getPhoneNumber());
+        fieldExpirationDate.setText(dateFormat.format(member.getExpirationDate()));
     }
 
     private void setDateOfBirth(Date date) {
