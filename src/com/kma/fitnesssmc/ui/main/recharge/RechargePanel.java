@@ -1,5 +1,7 @@
 package com.kma.fitnesssmc.ui.main.recharge;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.TextField;
 
@@ -23,12 +25,16 @@ public class RechargePanel extends JPanel {
 
     private final JButton btnBack = new JButton("Back");
 
+    private RechargeViewModel viewModel;
+
     public RechargePanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -39,6 +45,12 @@ public class RechargePanel extends JPanel {
         setupBackButton();
 
         setEvents();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new RechargeViewModel(memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -130,7 +142,17 @@ public class RechargePanel extends JPanel {
     }
 
     private void recharge() {
+        String remainingBalanceRaw = fieldRecharge.getText().replace(",", "");
+        long remainingBalance = Long.parseLong(remainingBalanceRaw.isBlank() ? "0" : remainingBalanceRaw);
+        String errorMessage = viewModel.recharge(remainingBalance);
 
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Recharge successfully!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        fieldRecharge.setText(null);
     }
 
     private void navigateToHome() {

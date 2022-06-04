@@ -30,4 +30,10 @@ public class Bytes {
         buffer.flip();  //need flip
         return buffer.getLong();
     }
+
+    public static byte @NotNull [] fromLong(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
+    }
 }

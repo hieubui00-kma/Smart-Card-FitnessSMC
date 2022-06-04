@@ -150,4 +150,17 @@ public class MemberRepository {
             return false;
         }
     }
+
+    public boolean recharge(long remainingBalance) {
+        try {
+            byte[] data = Bytes.fromLong(remainingBalance);
+            CommandAPDU createCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
+            ResponseAPDU response = sessionManager.transmit(createCommand);
+
+            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        } catch (NullPointerException | CardException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
