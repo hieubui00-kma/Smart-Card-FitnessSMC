@@ -27,11 +27,13 @@ public class ConnectViewModel {
         }
 
         try {
-            return sessionManager.connect() == null ? "Card connection failed!" : null;
+            if (sessionManager.connect() == null) return "Card connection failed!";
         } catch (CardException e) {
             e.printStackTrace();
             return "Card connection failed!";
         }
+
+        return memberRepository.verify(pin) ? null : "PIN code is incorrect!";
     }
 
     public @Nullable Member getMember() {

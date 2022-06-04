@@ -24,6 +24,18 @@ public class MemberRepository {
         this.sessionManager = sessionManager;
     }
 
+    public boolean verify(@NotNull String pin) {
+        try {
+            CommandAPDU command = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
+            ResponseAPDU response = sessionManager.transmit(command);
+
+            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        } catch (NullPointerException | CardException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
@@ -32,12 +44,14 @@ public class MemberRepository {
         @NotNull String newPin
     ) {
         try {
+            Date now = Calendar.getInstance().getTime();
             Member member = new Member();
 
             member.setFullName(fullName);
             member.setDateOfBirth(dateOfBirth);
             member.setPhoneNumber(phoneNumber);
-            member.setExpirationDate(Calendar.getInstance().getTime());
+            member.setAvatar(avatar);
+            member.setExpirationDate(now);
 
             CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, member.getProfileData());
             ResponseAPDU createResponse = sessionManager.transmit(createCommand);

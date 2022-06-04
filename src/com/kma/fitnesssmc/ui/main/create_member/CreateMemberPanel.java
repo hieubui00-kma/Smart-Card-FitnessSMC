@@ -1,6 +1,7 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
 import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
@@ -187,7 +188,7 @@ public class CreateMemberPanel extends JPanel {
         final int y = fieldPhoneNumber.getY() + fieldPhoneNumber.getHeight() + 16;
 
         // Setup New Pin label
-        labelNewPin.setBounds(fieldPhoneNumber.getX(), y, 60, 24);
+        labelNewPin.setBounds(fieldPhoneNumber.getX(), y, 62, 24);
         labelNewPin.setFont(new Font("Arial", Font.BOLD, 14));
         labelNewPin.setHorizontalAlignment(SwingConstants.CENTER);
         labelNewPin.setVerticalAlignment(SwingConstants.CENTER);
