@@ -3,6 +3,7 @@ package com.kma.fitnesssmc.ui.main.home;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
+import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 
 import javax.swing.*;
@@ -13,9 +14,10 @@ import java.text.SimpleDateFormat;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class HomePanel extends JPanel {
-    private final JLabel labelTitle = new JLabel("MEMBER PROFILE");
+    private final JLabel labelTitle = new JLabel("FITNESS SMART CARD");
 
     private final ImagePanel panelAvatar = new ImagePanel();
 
@@ -28,6 +30,14 @@ public class HomePanel extends JPanel {
     private final JLabel labelPhoneNumber = new JLabel();
 
     private final JLabel labelExpirationDate = new JLabel();
+
+    private final JButton btnProfile = new JButton("Profile");
+
+    private final JButton btnChanePIN = new JButton("Change PIN");
+
+    private final JButton btnRecharge = new JButton("Recharge");
+
+    private final JButton btnPayment = new JButton("Payment");
 
     private final JButton btnExit = new JButton("Exit");
 
@@ -51,6 +61,10 @@ public class HomePanel extends JPanel {
         setupDateOfBirthLabel();
         setupPhoneNumberLabel();
         setupExpirationDateLabel();
+        setupProfileButton();
+        setupChangePINButton();
+        setupRechargeButton();
+        setupPaymentButton();
         setupExitButton();
 
         setEvents();
@@ -195,13 +209,67 @@ public class HomePanel extends JPanel {
         add(labelExpirationDate);
     }
 
-    private void setupExitButton() {
-        final int width = 128;
+    private void setupProfileButton() {
         final int height = 40;
-        final int x = (WIDTH_FRAME - width) / 2;
         final int y = HEIGHT_FRAME - 32 - height;
 
-        btnExit.setBounds(x, y, width, height);
+        btnProfile.setBounds(72, y, 128, height);
+        btnProfile.setFont(new Font("Arial", Font.BOLD, 16));
+        btnProfile.setHorizontalAlignment(SwingConstants.CENTER);
+        btnProfile.setVerticalAlignment(SwingConstants.CENTER);
+        btnProfile.setFocusPainted(false);
+
+        add(btnProfile);
+    }
+
+    private void setupChangePINButton() {
+        final int height = 40;
+        final int x = btnProfile.getX() + btnProfile.getWidth() + 24;
+        final int y = HEIGHT_FRAME - 32 - height;
+
+        btnChanePIN.setBounds(x, y, 128, height);
+        btnChanePIN.setFont(new Font("Arial", Font.BOLD, 16));
+        btnChanePIN.setHorizontalAlignment(SwingConstants.CENTER);
+        btnChanePIN.setVerticalAlignment(SwingConstants.CENTER);
+        btnChanePIN.setFocusPainted(false);
+
+        add(btnChanePIN);
+    }
+
+    private void setupRechargeButton() {
+        final int height = 40;
+        final int x = btnChanePIN.getX() + btnChanePIN.getWidth() + 24;
+        final int y = HEIGHT_FRAME - 32 - height;
+
+        btnRecharge.setBounds(x, y, 128, height);
+        btnRecharge.setFont(new Font("Arial", Font.BOLD, 16));
+        btnRecharge.setHorizontalAlignment(SwingConstants.CENTER);
+        btnRecharge.setVerticalAlignment(SwingConstants.CENTER);
+        btnRecharge.setFocusPainted(false);
+
+        add(btnRecharge);
+    }
+
+    private void setupPaymentButton() {
+        final int height = 40;
+        final int x = btnRecharge.getX() + btnRecharge.getWidth() + 24;
+        final int y = HEIGHT_FRAME - 32 - height;
+
+        btnPayment.setBounds(x, y, 128, height);
+        btnPayment.setFont(new Font("Arial", Font.BOLD, 16));
+        btnPayment.setHorizontalAlignment(SwingConstants.CENTER);
+        btnPayment.setVerticalAlignment(SwingConstants.CENTER);
+        btnPayment.setFocusPainted(false);
+
+        add(btnPayment);
+    }
+
+    private void setupExitButton() {
+        final int height = 40;
+        final int x = btnPayment.getX() + btnPayment.getWidth() + 24;
+        final int y = HEIGHT_FRAME - 32 - height;
+
+        btnExit.setBounds(x, y, 128, height);
         btnExit.setFont(new Font("Arial", Font.BOLD, 16));
         btnExit.setHorizontalAlignment(SwingConstants.CENTER);
         btnExit.setVerticalAlignment(SwingConstants.CENTER);
@@ -215,7 +283,10 @@ public class HomePanel extends JPanel {
     }
 
     private void exit() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+
         viewModel.disconnect();
+        mainFrame.navigateToConnect();
     }
 
     private void getMember() {

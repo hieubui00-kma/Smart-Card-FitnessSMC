@@ -53,4 +53,8 @@ public class MainFrame extends JFrame {
     public void navigateToHome() {
         replace(new HomePanel());
     }
+
+    public void navigateToConnect() {
+        replace(new ConnectPanel());
+    }
 }
