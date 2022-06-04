@@ -1,10 +1,15 @@
 package com.kma.fitnesssmc.ui.main.home;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 
 import javax.swing.*;
 
 import java.awt.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
@@ -26,12 +31,16 @@ public class HomePanel extends JPanel {
 
     private final JButton btnExit = new JButton("Exit");
 
+    private HomeViewModel viewModel;
+
     public HomePanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -43,6 +52,16 @@ public class HomePanel extends JPanel {
         setupPhoneNumberLabel();
         setupExpirationDateLabel();
         setupExitButton();
+
+        setEvents();
+
+        getMember();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new HomeViewModel(sessionManager, memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -189,5 +208,30 @@ public class HomePanel extends JPanel {
         btnExit.setFocusPainted(false);
 
         add(btnExit);
+    }
+
+    private void setEvents() {
+        btnExit.addActionListener(event -> exit());
+    }
+
+    private void exit() {
+        viewModel.disconnect();
+    }
+
+    private void getMember() {
+        Member member = viewModel.getMember();
+
+        if (member == null) {
+            JOptionPane.showMessageDialog(this, "Error! An error occurred. Please try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+
+        labelMemberID.setText(member.getID());
+        labelFullName.setText(member.getFullName());
+        labelDateOfBirth.setText(dateFormat.format(member.getDateOfBirth()));
+        labelPhoneNumber.setText(member.getPhoneNumber());
+        labelExpirationDate.setText(dateFormat.format(member.getExpirationDate()));
     }
 }
