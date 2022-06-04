@@ -28,8 +28,8 @@ public class MemberRepository {
 
     public boolean verify(@NotNull String pin) {
         try {
-            CommandAPDU command = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
-            ResponseAPDU response = sessionManager.transmit(command);
+            CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
+            ResponseAPDU response = sessionManager.transmit(verifyCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00;
         } catch (NullPointerException | CardException e) {
@@ -135,8 +135,8 @@ public class MemberRepository {
 
     public boolean updatePin(@NotNull String pin) {
         try {
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, pin.getBytes());
-            ResponseAPDU response = sessionManager.transmit(createCommand);
+            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, pin.getBytes());
+            ResponseAPDU response = sessionManager.transmit(updateCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00;
         } catch (NullPointerException | CardException e) {
@@ -159,8 +159,8 @@ public class MemberRepository {
         ).getBytes();
 
         try {
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
-            ResponseAPDU response = sessionManager.transmit(createCommand);
+            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
+            ResponseAPDU response = sessionManager.transmit(updateCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00;
         } catch (NullPointerException | CardException e) {
@@ -172,8 +172,8 @@ public class MemberRepository {
     public boolean recharge(long remainingBalance) {
         try {
             byte[] data = Bytes.fromLong(remainingBalance);
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
-            ResponseAPDU response = sessionManager.transmit(createCommand);
+            CommandAPDU rechargeCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
+            ResponseAPDU response = sessionManager.transmit(rechargeCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00;
         } catch (NullPointerException | CardException e) {
