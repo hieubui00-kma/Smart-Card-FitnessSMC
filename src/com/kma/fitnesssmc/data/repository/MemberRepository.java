@@ -107,7 +107,10 @@ public class MemberRepository {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         int offset = 0;
 
-        String fullName = new String(Arrays.copyOfRange(data, offset + 1, data[offset] + 1));
+        String memberID = new String(Arrays.copyOfRange(data, offset + 1, data[offset] + 1));
+
+        offset += memberID.length() + 1;
+        String fullName = new String(Arrays.copyOfRange(data, offset + 1, offset + data[offset] + 1));
 
         offset += fullName.length() + 1;
         String dateOfBirth = new String(Arrays.copyOfRange(data, offset + 1, offset + data[offset] + 1));
@@ -121,6 +124,7 @@ public class MemberRepository {
         offset += expirationDate.length() + 1;
         long remainingBalance = Bytes.toLong(Arrays.copyOfRange(data, offset + 1, offset + data[offset] + 1));
 
+        member.setID(memberID);
         member.setFullName(fullName);
         member.setDateOfBirth(dateFormat.parse(dateOfBirth));
         member.setPhoneNumber(phoneNumber);
