@@ -2,6 +2,7 @@ package com.kma.fitnesssmc.data.repository;
 
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,6 +53,7 @@ public class MemberRepository {
             member.setPhoneNumber(phoneNumber);
             member.setAvatar(avatar);
             member.setExpirationDate(now);
+            member.setRemainingBalance(0);
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             String nowFormatted = dateFormat.format(now);
@@ -102,10 +104,14 @@ public class MemberRepository {
         offset += phoneNumber.length() + 1;
         String expirationDate = new String(Arrays.copyOfRange(data, offset + 1, offset + data[offset] + 1));
 
+        offset += expirationDate.length() + 1;
+        long remainingBalance = Bytes.toLong(Arrays.copyOfRange(data, offset + 1, offset + data[offset] + 1));
+
         member.setFullName(fullName);
         member.setDateOfBirth(dateFormat.parse(dateOfBirth));
         member.setPhoneNumber(phoneNumber);
         member.setExpirationDate(dateFormat.parse(expirationDate));
+        member.setRemainingBalance(remainingBalance);
         return member;
     }
 
