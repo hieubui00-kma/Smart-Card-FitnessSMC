@@ -102,9 +102,9 @@ public class ProfilePanel extends JPanel {
     private void setupChooseAvatarButton() {
         final int width = 145;
         final int x = panelAvatar.getX() + (panelAvatar.getWidth() - width) / 2;
-        final int y = panelAvatar.getY() + panelAvatar.getHeight() + 16;
+        final int y = panelAvatar.getY() + panelAvatar.getHeight() + 24;
 
-        btnChooseAvatar.setBounds(x, y, width, 32);
+        btnChooseAvatar.setBounds(x, y, width, 40);
         btnChooseAvatar.setFont(new Font("Arial", Font.BOLD, 16));
         btnChooseAvatar.setHorizontalAlignment(SwingConstants.CENTER);
         btnChooseAvatar.setVerticalAlignment(SwingConstants.CENTER);

@@ -59,7 +59,11 @@ public class MemberRepository {
             CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
             ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
+            if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
+                return null;
+            }
+
+            return updatePin(newPin) ? member : null;
         } catch (NullPointerException | CardException e) {
             e.printStackTrace();
             return null;
@@ -103,6 +107,18 @@ public class MemberRepository {
         member.setPhoneNumber(phoneNumber);
         member.setExpirationDate(dateFormat.parse(expirationDate));
         return member;
+    }
+
+    public boolean updatePin(@NotNull String pin) {
+        try {
+            CommandAPDU createCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, pin.getBytes());
+            ResponseAPDU response = sessionManager.transmit(createCommand);
+
+            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        } catch (NullPointerException | CardException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean updateProfile(
