@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public class Bytes {
 
@@ -21,5 +22,18 @@ public class Bytes {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static long toLong(byte[] bytes) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.put(bytes);
+        buffer.flip();  //need flip
+        return buffer.getLong();
+    }
+
+    public static byte @NotNull [] fromLong(long x) {
+        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
+        buffer.putLong(x);
+        return buffer.array();
     }
 }
