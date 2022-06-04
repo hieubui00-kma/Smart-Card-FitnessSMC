@@ -17,6 +17,8 @@ public class Member {
 
     private Date expirationDate;
 
+    private long remainingBalance;
+
     @Override
     public String toString() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -82,5 +84,13 @@ public class Member {
 
     public void setExpirationDate(Date expirationDate) {
         this.expirationDate = expirationDate;
+    }
+
+    public long getRemainingBalance() {
+        return remainingBalance;
+    }
+
+    public void setRemainingBalance(long remainingBalance) {
+        this.remainingBalance = remainingBalance;
     }
 }
