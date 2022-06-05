@@ -43,7 +43,7 @@ public class MemberRepository {
         @NotNull Date dateOfBirth,
         @NotNull String phoneNumber,
         byte[] avatar,
-        @NotNull String newPin
+        @NotNull String newPIN
     ) {
         try {
             String memberID = createMemberID();
@@ -65,7 +65,7 @@ public class MemberRepository {
                 (char) memberID.length() + memberID
                 + profileData
                 + (char) nowFormatted.length() + nowFormatted
-                + (char) newPin.length() + newPin;
+                + (char) newPIN.length() + newPIN;
 
             CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
             ResponseAPDU createResponse = sessionManager.transmit(createCommand);
@@ -133,9 +133,11 @@ public class MemberRepository {
         return member;
     }
 
-    public boolean updatePin(@NotNull String pin) {
+    public boolean updatePin(@NotNull String currentPIN, @NotNull String newPIN) {
+        String data = (char) currentPIN.length() + currentPIN + (char) newPIN.length() + newPIN;
+
         try {
-            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, pin.getBytes());
+            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data.getBytes());
             ResponseAPDU response = sessionManager.transmit(updateCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00;
@@ -145,11 +147,7 @@ public class MemberRepository {
         }
     }
 
-    public boolean updateProfile(
-        @NotNull String fullName,
-        @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber
-    ) {
+    public boolean updateProfile(@NotNull String fullName, @NotNull Date dateOfBirth, @NotNull String phoneNumber) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
         byte[] data = (

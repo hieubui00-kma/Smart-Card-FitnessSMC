@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main;
 
+import com.kma.fitnesssmc.ui.main.change_pin.ChangePinPanel;
 import com.kma.fitnesssmc.ui.main.connect.ConnectPanel;
 import com.kma.fitnesssmc.ui.main.create_member.CreateMemberPanel;
 import com.kma.fitnesssmc.ui.main.home.HomePanel;
@@ -58,6 +59,10 @@ public class MainFrame extends JFrame {
 
     public void navigateToProfile() {
         replace(new ProfilePanel());
+    }
+
+    public void navigateToChangePIN() {
+        replace(new ChangePinPanel());
     }
 
     public void navigateToRecharge() {
