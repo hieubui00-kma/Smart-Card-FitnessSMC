@@ -307,6 +307,8 @@ public class HomePanel extends JPanel {
     private void setEvents() {
         btnProfile.addActionListener(event -> navigateToProfile());
 
+        btnChanePIN.addActionListener(event -> navigateToChangePIN());
+
         btnRecharge.addActionListener(event -> navigateToRecharge());
 
         btnExit.addActionListener(event -> exit());
@@ -315,6 +317,11 @@ public class HomePanel extends JPanel {
     private void navigateToProfile() {
         MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
         mainFrame.navigateToProfile();
+    }
+
+    private void navigateToChangePIN() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToChangePIN();
     }
 
     private void navigateToRecharge() {

@@ -95,7 +95,7 @@ public class RechargePanel extends JPanel {
     }
 
     private void setupRechargeButton() {
-        final int y = labelEnterRecharge.getY() + labelEnterRecharge.getHeight() + 56;
+        final int y = fieldRecharge.getY() + fieldRecharge.getHeight() + 56;
 
         btnRecharge.setBounds(268, y, 156, 40);
         btnRecharge.setFont(new Font("Arial", Font.BOLD, 16));
