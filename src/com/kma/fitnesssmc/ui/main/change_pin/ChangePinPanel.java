@@ -1,5 +1,7 @@
 package com.kma.fitnesssmc.ui.main.change_pin;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 
@@ -29,12 +31,16 @@ public class ChangePinPanel extends JPanel {
 
     private final JButton btnBack = new JButton("Back");
 
+    private ChangePinViewModel viewModel;
+
     public ChangePinPanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -46,6 +52,12 @@ public class ChangePinPanel extends JPanel {
         setupBackButton();
 
         setEvents();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new ChangePinViewModel(memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -153,7 +165,20 @@ public class ChangePinPanel extends JPanel {
     }
 
     private void changePIN() {
+        String currentPin = new String(fieldCurrentPIN.getPassword());
+        String newPin = new String(fieldNewPIN.getPassword());
+        String confirmNewPin = new String(fieldConfirmNewPIN.getPassword());
+        String errorMessage = viewModel.changePIN(currentPin, newPin, confirmNewPin);
 
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Recharge successfully!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        fieldCurrentPIN.setText(null);
+        fieldNewPIN.setText(null);
+        fieldConfirmNewPIN.setText(null);
     }
 
     private void navigateToHome() {
