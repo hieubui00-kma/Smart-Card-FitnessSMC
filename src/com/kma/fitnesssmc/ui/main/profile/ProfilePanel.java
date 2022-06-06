@@ -299,7 +299,7 @@ public class ProfilePanel extends JPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Update successfully!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Update successful!", "Error", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void navigateToHome() {

@@ -151,7 +151,7 @@ public class RechargePanel extends JPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Recharge successfully!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Recharge successful!", "Error", JOptionPane.INFORMATION_MESSAGE);
         fieldRecharge.setText(null);
     }
 
