@@ -67,7 +67,7 @@ public class MemberRepository {
         CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
         ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-        return createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00 ? member : null;
+        return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
     }
 
     private @NotNull String createMemberID() {
