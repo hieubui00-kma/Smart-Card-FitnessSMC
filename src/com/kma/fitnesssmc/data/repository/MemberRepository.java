@@ -44,37 +44,35 @@ public class MemberRepository {
         @NotNull String phoneNumber,
         byte[] avatar,
         @NotNull String newPIN
-    ) {
-        try {
-            String memberID = createMemberID();
-            Date now = Calendar.getInstance().getTime();
-            Member member = new Member();
+    ) throws CardException {
+        // Initialization new member
+        String memberID = createMemberID();
+        Date now = Calendar.getInstance().getTime();
+        Member member = new Member();
 
-            member.setID(memberID);
-            member.setFullName(fullName);
-            member.setDateOfBirth(dateOfBirth);
-            member.setPhoneNumber(phoneNumber);
-            member.setAvatar(avatar);
-            member.setExpirationDate(now);
-            member.setRemainingBalance(0);
+        member.setID(memberID);
+        member.setFullName(fullName);
+        member.setDateOfBirth(dateOfBirth);
+        member.setPhoneNumber(phoneNumber);
+        member.setAvatar(avatar);
+        member.setExpirationDate(now);
+        member.setRemainingBalance(0);
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String profileData = new String(member.getProfileData());
-            String nowFormatted = dateFormat.format(now);
-            String data =
-                (char) memberID.length() + memberID
+        // Parse new member to data bytes
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String profileData = new String(member.getProfileData());
+        String nowFormatted = dateFormat.format(now);
+        String data =
+            (char) memberID.length() + memberID
                 + profileData
                 + (char) nowFormatted.length() + nowFormatted
                 + (char) newPIN.length() + newPIN;
 
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
-            ResponseAPDU createResponse = sessionManager.transmit(createCommand);
+        // Transmit create member command
+        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
+        ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00 ? member : null;
     }
 
     private @NotNull String createMemberID() {
