@@ -3,6 +3,8 @@ package com.kma.fitnesssmc.ui.main.change_pin;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import org.jetbrains.annotations.Nullable;
 
+import javax.smartcardio.CardException;
+
 public class ChangePinViewModel {
     private final MemberRepository memberRepository;
 
@@ -17,8 +19,12 @@ public class ChangePinViewModel {
             return errorMessage;
         }
 
-
-        return memberRepository.updatePin(currentPin, newPin) ? null : "PIN change failed!";
+        try {
+            return memberRepository.updatePin(currentPin, newPin) ? null : "PIN change failed!";
+        } catch (CardException e) {
+            e.printStackTrace();
+            return "Error! An error occurred. Please try again later.";
+        }
     }
 
     private @Nullable String validate(
