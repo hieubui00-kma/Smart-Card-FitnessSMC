@@ -3,6 +3,8 @@ package com.kma.fitnesssmc.ui.main.recharge;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import org.jetbrains.annotations.Nullable;
 
+import javax.smartcardio.CardException;
+
 public class RechargeViewModel {
     private final MemberRepository memberRepository;
 
@@ -15,6 +17,11 @@ public class RechargeViewModel {
             return "Enter your recharge.";
         }
 
-        return memberRepository.recharge(remainingBalance) ? null : "Error! An error occurred. Please try again later.";
+        try {
+            return memberRepository.recharge(remainingBalance) ? null : "Recharge failed!";
+        } catch (CardException e) {
+            e.printStackTrace();
+            return "Error! An error occurred. Please try again later.";
+        }
     }
 }
