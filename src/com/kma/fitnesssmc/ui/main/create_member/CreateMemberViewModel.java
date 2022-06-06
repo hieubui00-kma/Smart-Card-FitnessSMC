@@ -1,11 +1,11 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
-import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -35,7 +35,30 @@ public class CreateMemberViewModel {
         }
     }
 
-    public @Nullable String validate(
+    public @Nullable String createMember(
+        String fullName,
+        Date dateOfBirth,
+        String phoneNumber,
+        String newPin,
+        String confirmNewPin
+    ) {
+        String errorMessage = validate(fullName, dateOfBirth, phoneNumber, newPin, confirmNewPin);
+
+        if (errorMessage != null) {
+            return errorMessage;
+        }
+
+        byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
+
+        try {
+            return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar, newPin) != null ? null : "New member creation failed!";
+        } catch (CardException e) {
+            e.printStackTrace();
+            return "Error! An error occurred. Please try again later.";
+        }
+    }
+
+    private @Nullable String validate(
         @Nullable String fullName,
         @Nullable Date dateOfBirth,
         @Nullable String phoneNumber,
@@ -80,16 +103,5 @@ public class CreateMemberViewModel {
         }
 
         return "Confirm new PIN is not match!";
-    }
-
-    public @Nullable Member createMember(
-        @NotNull String fullName,
-        @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber,
-        @NotNull String newPin
-    ) {
-        byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
-
-        return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar, newPin);
     }
 }

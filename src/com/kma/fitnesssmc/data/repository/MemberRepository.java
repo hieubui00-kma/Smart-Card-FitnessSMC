@@ -26,16 +26,11 @@ public class MemberRepository {
         this.sessionManager = sessionManager;
     }
 
-    public boolean verify(@NotNull String pin) {
-        try {
-            CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
-            ResponseAPDU response = sessionManager.transmit(verifyCommand);
+    public boolean verify(@NotNull String pin) throws CardException {
+        CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
+        ResponseAPDU response = sessionManager.transmit(verifyCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
     public @Nullable Member createMember(
@@ -44,37 +39,35 @@ public class MemberRepository {
         @NotNull String phoneNumber,
         byte[] avatar,
         @NotNull String newPIN
-    ) {
-        try {
-            String memberID = createMemberID();
-            Date now = Calendar.getInstance().getTime();
-            Member member = new Member();
+    ) throws CardException {
+        // Initialization new member
+        String memberID = createMemberID();
+        Date now = Calendar.getInstance().getTime();
+        Member member = new Member();
 
-            member.setID(memberID);
-            member.setFullName(fullName);
-            member.setDateOfBirth(dateOfBirth);
-            member.setPhoneNumber(phoneNumber);
-            member.setAvatar(avatar);
-            member.setExpirationDate(now);
-            member.setRemainingBalance(0);
+        member.setID(memberID);
+        member.setFullName(fullName);
+        member.setDateOfBirth(dateOfBirth);
+        member.setPhoneNumber(phoneNumber);
+        member.setAvatar(avatar);
+        member.setExpirationDate(now);
+        member.setRemainingBalance(0);
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String profileData = new String(member.getProfileData());
-            String nowFormatted = dateFormat.format(now);
-            String data =
-                (char) memberID.length() + memberID
+        // Parse new member to data bytes
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String profileData = new String(member.getProfileData());
+        String nowFormatted = dateFormat.format(now);
+        String data =
+            (char) memberID.length() + memberID
                 + profileData
                 + (char) nowFormatted.length() + nowFormatted
                 + (char) newPIN.length() + newPIN;
 
-            CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
-            ResponseAPDU createResponse = sessionManager.transmit(createCommand);
+        // Transmit create member command
+        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data.getBytes());
+        ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-            return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
     }
 
     private @NotNull String createMemberID() {
@@ -133,21 +126,22 @@ public class MemberRepository {
         return member;
     }
 
-    public boolean updatePin(@NotNull String currentPIN, @NotNull String newPIN) {
+    public boolean updatePin(
+        @NotNull String currentPIN,
+        @NotNull String newPIN
+    ) throws CardException {
         String data = (char) currentPIN.length() + currentPIN + (char) newPIN.length() + newPIN;
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data.getBytes());
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-        try {
-            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data.getBytes());
-            ResponseAPDU response = sessionManager.transmit(updateCommand);
-
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    public boolean updateProfile(@NotNull String fullName, @NotNull Date dateOfBirth, @NotNull String phoneNumber) {
+    public boolean updateProfile(
+        @NotNull String fullName,
+        @NotNull Date dateOfBirth,
+        @NotNull String phoneNumber
+    ) throws CardException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
         byte[] data = (
@@ -156,27 +150,17 @@ public class MemberRepository {
             (char) phoneNumber.length() + phoneNumber
         ).getBytes();
 
-        try {
-            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
-            ResponseAPDU response = sessionManager.transmit(updateCommand);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    public boolean recharge(long remainingBalance) {
-        try {
-            byte[] data = Bytes.fromLong(remainingBalance);
-            CommandAPDU rechargeCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
-            ResponseAPDU response = sessionManager.transmit(rechargeCommand);
+    public boolean recharge(long remainingBalance) throws CardException {
+        byte[] data = Bytes.fromLong(remainingBalance);
+        CommandAPDU rechargeCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
+        ResponseAPDU response = sessionManager.transmit(rechargeCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 }
