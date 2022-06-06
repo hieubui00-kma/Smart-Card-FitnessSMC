@@ -17,7 +17,25 @@ public class ConnectViewModel {
         this.memberRepository = memberRepository;
     }
 
-    public @Nullable String connect(@Nullable String pin) {
+    public @Nullable String connect(String pin) {
+        String errorMessage = validate(pin);
+
+        if (errorMessage != null) {
+            return errorMessage;
+        }
+
+        try {
+            sessionManager.connect();
+            if (memberRepository.verify(pin)) {
+                return null;
+            }
+        } catch (CardException e) {
+            e.printStackTrace();
+        }
+        return "Card connection failed!";
+    }
+
+    private @Nullable String validate(@Nullable String pin) {
         if (pin == null || pin.isBlank()) {
             return "Enter your PIN";
         }
@@ -26,14 +44,7 @@ public class ConnectViewModel {
             return "Your PIN is invalid!";
         }
 
-        try {
-            if (sessionManager.connect() == null) return "Card connection failed!";
-        } catch (CardException e) {
-            e.printStackTrace();
-            return "Card connection failed!";
-        }
-
-        return memberRepository.verify(pin) ? null : "PIN code is incorrect!";
+        return null;
     }
 
     public @Nullable Member getMember() {

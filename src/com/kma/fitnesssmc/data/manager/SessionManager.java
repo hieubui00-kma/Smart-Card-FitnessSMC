@@ -1,7 +1,6 @@
 package com.kma.fitnesssmc.data.manager;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.smartcardio.*;
 import java.util.List;
@@ -17,7 +16,7 @@ public class SessionManager {
 
     }
 
-    public @Nullable Card connect() throws CardException {
+    public void connect() throws CardException {
         TerminalFactory factory = TerminalFactory.getDefault();
         List<CardTerminal> terminals = factory.terminals().list();
         Card card = terminals.get(0).connect("*");
@@ -25,7 +24,12 @@ public class SessionManager {
         CommandAPDU selectCommand = new CommandAPDU(0, 164, 4, 0, AID);
         ResponseAPDU response = channel.transmit(selectCommand);
 
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? this.card = card : null;
+        if (response.getSW1() == 0x90 && response.getSW2() == 0x00) {
+            this.card = card;
+            return;
+        }
+
+        throw new CardException("Incorrect AID");
     }
 
     public ResponseAPDU transmit(CommandAPDU command) throws NullPointerException, CardException {
