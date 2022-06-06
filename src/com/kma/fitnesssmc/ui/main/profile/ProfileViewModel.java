@@ -5,6 +5,7 @@ import com.kma.fitnesssmc.data.repository.MemberRepository;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -49,7 +50,12 @@ public class ProfileViewModel {
             return errorMessage;
         }
 
-        return memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber) ? null : "Member profile update failed!";
+        try {
+            return memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber) ? null : "Member profile update failed!";
+        } catch (CardException e) {
+            e.printStackTrace();
+            return "Error! An error occurred. Please try again later.";
+        }
     }
 
     private @Nullable String validate(

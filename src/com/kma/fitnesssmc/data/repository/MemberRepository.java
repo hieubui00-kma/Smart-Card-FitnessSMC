@@ -137,7 +137,11 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    public boolean updateProfile(@NotNull String fullName, @NotNull Date dateOfBirth, @NotNull String phoneNumber) {
+    public boolean updateProfile(
+        @NotNull String fullName,
+        @NotNull Date dateOfBirth,
+        @NotNull String phoneNumber
+    ) throws CardException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
         byte[] data = (
@@ -146,15 +150,10 @@ public class MemberRepository {
             (char) phoneNumber.length() + phoneNumber
         ).getBytes();
 
-        try {
-            CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
-            ResponseAPDU response = sessionManager.transmit(updateCommand);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-        } catch (NullPointerException | CardException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
     public boolean recharge(long remainingBalance) {
