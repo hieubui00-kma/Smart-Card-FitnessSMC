@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.payment;
 
+import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import com.kma.fitnesssmc.util.EpisodePack;
 
@@ -9,6 +10,7 @@ import java.util.List;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class PaymentPanel extends JPanel {
     private final JLabel labelTitle = new JLabel("PAYMENT");
@@ -40,6 +42,8 @@ public class PaymentPanel extends JPanel {
         setupPINField();
         setupPaymentButton();
         setupBackButton();
+
+        setEvents();
     }
 
     private void setupTitleLabel() {
@@ -133,5 +137,14 @@ public class PaymentPanel extends JPanel {
         btnBack.setFocusPainted(false);
 
         add(btnBack);
+    }
+
+    private void setEvents() {
+        btnBack.addActionListener(event -> navigateToHome());
+    }
+
+    private void navigateToHome() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToHome();
     }
 }
