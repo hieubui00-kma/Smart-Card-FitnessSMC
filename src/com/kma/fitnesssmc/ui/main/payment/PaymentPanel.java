@@ -1,5 +1,8 @@
 package com.kma.fitnesssmc.ui.main.payment;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import com.kma.fitnesssmc.util.EpisodePack;
@@ -15,7 +18,7 @@ import static javax.swing.SwingUtilities.getWindowAncestor;
 public class PaymentPanel extends JPanel {
     private final JLabel labelTitle = new JLabel("PAYMENT");
 
-    private final JLabel labelRemainingBalance = new JLabel("3,000,000 VND");
+    private final JLabel labelRemainingBalance = new JLabel();
 
     private final JLabel labelEpisodePacks = new JLabel("Episode Packs: ");
 
@@ -27,12 +30,16 @@ public class PaymentPanel extends JPanel {
 
     private final JButton btnBack = new JButton("Back");
 
+    private PaymentViewModel viewModel;
+
     public PaymentPanel() {
         super();
         initComponents();
     }
 
     private void initComponents() {
+        inject();
+
         setSize(WIDTH_FRAME, HEIGHT_FRAME);
         setLayout(null);
 
@@ -44,6 +51,14 @@ public class PaymentPanel extends JPanel {
         setupBackButton();
 
         setEvents();
+
+        getMember();
+    }
+
+    private void inject() {
+        SessionManager sessionManager = SessionManager.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        viewModel = new PaymentViewModel(memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -146,5 +161,16 @@ public class PaymentPanel extends JPanel {
     private void navigateToHome() {
         MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
         mainFrame.navigateToHome();
+    }
+
+    private void getMember() {
+        Member member = viewModel.getMember();
+
+        if (member == null) {
+            JOptionPane.showMessageDialog(this, "Error! An error occurred. Please try again later.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        labelRemainingBalance.setText(String.format("%,d", member.getRemainingBalance()) + " VND");
     }
 }
