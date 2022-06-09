@@ -18,4 +18,6 @@ public class Constants {
     public static final int P1_PIN = 0x06;
 
     public static final int P2_RECHARGE = 0x00;
+
+    public static final String ERROR_MESSAGE_CARD_HAS_BLOCKED = "Card has blocked!";
 }
