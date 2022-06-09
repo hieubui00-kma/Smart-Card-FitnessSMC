@@ -29,7 +29,16 @@ public class ConnectViewModel {
 
             sessionManager.connect();
             retriesRemaining = memberRepository.verify(pin);
-            return retriesRemaining == null ? null : "Your PIN is incorrect!\nThe retries remaining is " + retriesRemaining;
+
+            if (retriesRemaining == null) {
+                return null;
+            }
+
+            if (retriesRemaining == 0) {
+                return "Card has blocked!";
+            }
+
+            return "Your PIN is incorrect!\nThe retries remaining is " + retriesRemaining;
         } catch (CardException e) {
             e.printStackTrace();
         }
