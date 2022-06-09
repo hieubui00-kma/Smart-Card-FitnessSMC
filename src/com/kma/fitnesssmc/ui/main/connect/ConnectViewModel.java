@@ -25,10 +25,11 @@ public class ConnectViewModel {
         }
 
         try {
+            Integer retriesRemaining;
+
             sessionManager.connect();
-            if (memberRepository.verify(pin)) {
-                return null;
-            }
+            retriesRemaining = memberRepository.verify(pin);
+            return retriesRemaining == null ? null : "Your PIN is incorrect!\nThe retries remaining is " + retriesRemaining;
         } catch (CardException e) {
             e.printStackTrace();
         }

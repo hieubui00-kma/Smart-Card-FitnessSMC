@@ -26,11 +26,15 @@ public class MemberRepository {
         this.sessionManager = sessionManager;
     }
 
-    public boolean verify(@NotNull String pin) throws CardException {
+    public Integer verify(@NotNull String pin) throws CardException {
         CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
         ResponseAPDU response = sessionManager.transmit(verifyCommand);
 
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        if (response.getSW1() == 0x90 && response.getSW2() == 0x00) {
+            return null;
+        }
+
+        return (int) response.getData()[0];
     }
 
     public @Nullable Member createMember(
