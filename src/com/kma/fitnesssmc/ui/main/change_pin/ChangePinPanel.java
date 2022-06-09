@@ -8,8 +8,7 @@ import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import javax.swing.*;
 import java.awt.*;
 
-import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
-import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static com.kma.fitnesssmc.util.Constants.*;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class ChangePinPanel extends JPanel {
@@ -57,7 +56,7 @@ public class ChangePinPanel extends JPanel {
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
         MemberRepository memberRepository = new MemberRepository(sessionManager);
-        viewModel = new ChangePinViewModel(memberRepository);
+        viewModel = new ChangePinViewModel(memberRepository, sessionManager);
     }
 
     private void setupTitleLabel() {
@@ -172,6 +171,9 @@ public class ChangePinPanel extends JPanel {
 
         if (errorMessage != null) {
             JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            if (errorMessage.equals(ERROR_MESSAGE_CARD_HAS_BLOCKED)) {
+                navigateToConnect();
+            }
             return;
         }
 
@@ -179,6 +181,11 @@ public class ChangePinPanel extends JPanel {
         fieldCurrentPIN.setText(null);
         fieldNewPIN.setText(null);
         fieldConfirmNewPIN.setText(null);
+    }
+
+    private void navigateToConnect() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToConnect();
     }
 
     private void navigateToHome() {

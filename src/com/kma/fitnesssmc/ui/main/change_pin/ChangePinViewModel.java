@@ -1,15 +1,21 @@
 package com.kma.fitnesssmc.ui.main.change_pin;
 
+import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import org.jetbrains.annotations.Nullable;
 
 import javax.smartcardio.CardException;
 
+import static com.kma.fitnesssmc.util.Constants.ERROR_MESSAGE_CARD_HAS_BLOCKED;
+
 public class ChangePinViewModel {
     private final MemberRepository memberRepository;
 
-    public ChangePinViewModel(MemberRepository memberRepository) {
+    private final SessionManager sessionManager;
+
+    public ChangePinViewModel(MemberRepository memberRepository, SessionManager sessionManager) {
         this.memberRepository = memberRepository;
+        this.sessionManager = sessionManager;
     }
 
     public @Nullable String changePIN(String currentPin, String newPin, String confirmNewPin) {
@@ -20,7 +26,18 @@ public class ChangePinViewModel {
         }
 
         try {
-            return memberRepository.updatePin(currentPin, newPin) ? null : "PIN change failed!";
+            Integer retriesRemaining = memberRepository.updatePin(currentPin, newPin);
+
+            if (retriesRemaining == null) {
+                return null;
+            }
+
+            if (retriesRemaining == 0) {
+                disconnect();
+                return ERROR_MESSAGE_CARD_HAS_BLOCKED;
+            }
+
+            return "Your current PIN is incorrect!";
         } catch (CardException e) {
             e.printStackTrace();
             return "Error! An error occurred. Please try again later.";
@@ -53,5 +70,13 @@ public class ChangePinViewModel {
         }
 
         return "Confirm new PIN is not match!";
+    }
+
+    private void disconnect() {
+        try {
+            sessionManager.disconnect();
+        } catch (CardException e) {
+            e.printStackTrace();
+        }
     }
 }

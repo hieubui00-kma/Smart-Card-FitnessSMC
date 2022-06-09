@@ -130,7 +130,7 @@ public class MemberRepository {
         return member;
     }
 
-    public boolean updatePin(
+    public Integer updatePin(
         @NotNull String currentPIN,
         @NotNull String newPIN
     ) throws CardException {
@@ -138,7 +138,11 @@ public class MemberRepository {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data.getBytes());
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        if (response.getSW1() == 0x90 && response.getSW2() == 0x00) {
+            return null;
+        }
+
+        return (int) response.getData()[0];
     }
 
     public boolean updateProfile(

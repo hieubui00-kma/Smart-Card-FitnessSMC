@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.smartcardio.CardException;
 
+import static com.kma.fitnesssmc.util.Constants.ERROR_MESSAGE_CARD_HAS_BLOCKED;
+
 public class ConnectViewModel {
     private final SessionManager sessionManager;
 
@@ -35,7 +37,7 @@ public class ConnectViewModel {
             }
 
             if (retriesRemaining == 0) {
-                return "Card has blocked!";
+                return ERROR_MESSAGE_CARD_HAS_BLOCKED;
             }
 
             return "Your PIN is incorrect!\nThe retries remaining is " + retriesRemaining;
