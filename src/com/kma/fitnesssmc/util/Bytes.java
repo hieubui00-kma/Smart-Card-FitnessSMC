@@ -27,7 +27,7 @@ public class Bytes {
     public static long toLong(byte[] bytes) {
         ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
         buffer.put(bytes);
-        buffer.flip();  //need flip
+        buffer.flip();  // need flip
         return buffer.getLong();
     }
 
