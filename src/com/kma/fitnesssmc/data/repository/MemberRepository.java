@@ -2,7 +2,6 @@ package com.kma.fitnesssmc.data.repository;
 
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
-import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,7 +85,7 @@ public class MemberRepository {
 
     public @Nullable Member getMember() {
         try {
-            CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, 0x00, 0x00);
+            CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_PROFILE, 0x00);
             ResponseAPDU response = sessionManager.transmit(getCommand);
 
             return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? parseMemberData(response.getData()) : null;
@@ -138,6 +137,17 @@ public class MemberRepository {
         return member;
     }
 
+    public @Nullable Long getRemainingBalance() throws CardException {
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_REMAINING_BALANCE, 0x00);
+        ResponseAPDU response = sessionManager.transmit(getCommand);
+
+        if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
+            return null;
+        }
+
+        return Long.parseLong(new String(response.getData()));
+    }
+
     public Integer updatePin(
         @NotNull String currentPIN,
         @NotNull String newPIN
@@ -172,10 +182,16 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    public boolean recharge(long remainingBalance) throws CardException {
-        byte[] data = Bytes.fromLong(remainingBalance);
-        CommandAPDU rechargeCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, P2_RECHARGE, data);
-        ResponseAPDU response = sessionManager.transmit(rechargeCommand);
+    public boolean recharge(long balance) throws CardException {
+        Long currentRemainingBalance = getRemainingBalance();
+
+        if (currentRemainingBalance == null) {
+            return false;
+        }
+
+        byte[] data = String.valueOf(currentRemainingBalance + balance).getBytes();
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }

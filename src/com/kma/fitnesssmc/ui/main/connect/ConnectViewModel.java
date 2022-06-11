@@ -43,8 +43,8 @@ public class ConnectViewModel {
             return "Your PIN is incorrect!\nThe retries remaining is " + retriesRemaining;
         } catch (CardException e) {
             e.printStackTrace();
+            return "Card connection failed!";
         }
-        return "Card connection failed!";
     }
 
     private @Nullable String validate(@Nullable String pin) {
