@@ -35,14 +35,8 @@ public class CreateMemberViewModel {
         }
     }
 
-    public @Nullable String createMember(
-        String fullName,
-        Date dateOfBirth,
-        String phoneNumber,
-        String newPin,
-        String confirmNewPin
-    ) {
-        String errorMessage = validate(fullName, dateOfBirth, phoneNumber, newPin, confirmNewPin);
+    public @Nullable String createMember(String fullName, Date dateOfBirth, String phoneNumber) {
+        String errorMessage = validate(fullName, dateOfBirth, phoneNumber);
 
         if (errorMessage != null) {
             return errorMessage;
@@ -51,7 +45,7 @@ public class CreateMemberViewModel {
         byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
 
         try {
-            return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar, newPin) != null ? null : "New member creation failed!";
+            return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar) != null ? null : "New member creation failed!";
         } catch (CardException e) {
             e.printStackTrace();
             return "Error! An error occurred. Please try again later.";
@@ -61,9 +55,7 @@ public class CreateMemberViewModel {
     private @Nullable String validate(
         @Nullable String fullName,
         @Nullable Date dateOfBirth,
-        @Nullable String phoneNumber,
-        @Nullable String newPin,
-        @Nullable String confirmNewPin
+        @Nullable String phoneNumber
     ) {
         if (fullName == null || fullName.isBlank()) {
             return "Enter your full name.";
@@ -86,22 +78,6 @@ public class CreateMemberViewModel {
             return "Phone number is invalid!";
         }
 
-        if (newPin == null || newPin.isBlank()) {
-            return "Enter your new PIN.";
-        }
-
-        if (newPin.length() != 6) {
-            return "New PIN is invalid!";
-        }
-
-        if (confirmNewPin == null || confirmNewPin.isBlank()) {
-            return "Enter your confirm new PIN.";
-        }
-
-        if (confirmNewPin.equals(newPin)) {
-            return null;
-        }
-
-        return "Confirm new PIN is not match!";
+        return null;
     }
 }
