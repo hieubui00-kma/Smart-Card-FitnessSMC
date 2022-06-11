@@ -71,7 +71,15 @@ public class MemberRepository {
         CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data);
         ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-        return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
+        if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
+            return null;
+        }
+
+        if (avatar != null) {
+            updateAvatar(avatar);
+        }
+
+        return member;
     }
 
     private @NotNull String createMemberID() {
@@ -180,6 +188,12 @@ public class MemberRepository {
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+    }
+
+    private void updateAvatar(byte[] avatar) throws CardException {
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_AVATAR, 0x00, avatar);
+
+        sessionManager.transmit(updateCommand);
     }
 
     public boolean recharge(long balance) throws CardException {
