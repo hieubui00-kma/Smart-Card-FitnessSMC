@@ -2,6 +2,7 @@ package com.kma.fitnesssmc.ui.main.profile;
 
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
+import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,15 +10,13 @@ import javax.smartcardio.CardException;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.Date;
 
 public class ProfileViewModel {
     private final MemberRepository memberRepository;
 
-    private File fileAvatar;
+    private byte[] avatar;
 
     public ProfileViewModel(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
@@ -25,22 +24,6 @@ public class ProfileViewModel {
 
     public @Nullable Member getMember() {
         return memberRepository.getMember();
-    }
-
-    public @Nullable Image getAvatar() {
-        return null;
-    }
-
-    public @Nullable Image setAvatar(@NotNull File fileAvatar) {
-        try {
-            URL url = fileAvatar.toURI().toURL();
-
-            this.fileAvatar = fileAvatar;
-            return new ImageIcon(url).getImage();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 
     public @Nullable String updateMemberProfile(String fullName, Date dateOfBirth, String phoneNumber) {
@@ -51,7 +34,7 @@ public class ProfileViewModel {
         }
 
         try {
-            return memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber) ? null : "Member profile update failed!";
+            return memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber, avatar) ? null : "Member profile update failed!";
         } catch (CardException e) {
             e.printStackTrace();
             return "Error! An error occurred. Please try again later.";
@@ -85,5 +68,15 @@ public class ProfileViewModel {
         }
 
         return null;
+    }
+
+    public @Nullable Image setAvatar(byte[] data) {
+        this.avatar = data;
+        return new ImageIcon(avatar).getImage();
+    }
+
+    public @Nullable Image setAvatar(@NotNull File fileAvatar) {
+        this.avatar = Bytes.fromFile(fileAvatar);
+        return new ImageIcon(avatar).getImage();
     }
 }

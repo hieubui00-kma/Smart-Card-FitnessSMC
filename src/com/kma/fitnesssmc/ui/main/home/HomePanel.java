@@ -344,8 +344,10 @@ public class HomePanel extends JPanel {
             return;
         }
 
+        Image avatar = viewModel.getImage(member.getAvatar());
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
+        panelAvatar.setImage(avatar);
         labelMemberID.setText(member.getID());
         labelFullName.setText(member.getFullName());
         labelDateOfBirth.setText(dateFormat.format(member.getDateOfBirth()));

@@ -71,7 +71,12 @@ public class MemberRepository {
         CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data);
         ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
-        return createResponse.getSW1() == 0x90 && createResponse.getSW2() == 0x00 ? member : null;
+        if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
+            return null;
+        }
+
+        updateAvatar(avatar);
+        return member;
     }
 
     private @NotNull String createMemberID() {
@@ -88,14 +93,27 @@ public class MemberRepository {
             CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_PROFILE, 0x00);
             ResponseAPDU response = sessionManager.transmit(getCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? parseMemberData(response.getData()) : null;
+            if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
+                return null;
+            }
+
+            Member member = parseData(response.getData());
+
+            if (member == null) {
+                return null;
+            }
+
+            byte[] avatar = getAvatar();
+
+            member.setAvatar(avatar);
+            return member;
         } catch (CardException | ParseException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private @Nullable Member parseMemberData(byte[] rawData) throws ParseException {
+    private @Nullable Member parseData(byte[] rawData) throws ParseException {
         if (rawData.length < 1) {  // Data is empty because member isn't initialized
             return null;
         }
@@ -137,6 +155,13 @@ public class MemberRepository {
         return member;
     }
 
+    public byte[] getAvatar() throws CardException {
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_AVATAR, 0x00);
+        ResponseAPDU response = sessionManager.transmit(getCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
+    }
+
     public @Nullable Long getRemainingBalance() throws CardException {
         CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_REMAINING_BALANCE, 0x00);
         ResponseAPDU response = sessionManager.transmit(getCommand);
@@ -166,7 +191,8 @@ public class MemberRepository {
     public boolean updateProfile(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber
+        @NotNull String phoneNumber,
+        byte[] avatar
     ) throws CardException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
@@ -179,7 +205,14 @@ public class MemberRepository {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
+        updateAvatar(avatar);
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+    }
+
+    private void updateAvatar(byte[] avatar) throws CardException {
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_AVATAR, 0x00, avatar);
+
+        sessionManager.transmit(updateCommand);
     }
 
     public boolean recharge(long balance) throws CardException {
