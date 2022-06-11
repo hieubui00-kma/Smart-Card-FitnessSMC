@@ -315,8 +315,10 @@ public class ProfilePanel extends JPanel {
             return;
         }
 
+        Image avatar = viewModel.setAvatar(member.getAvatar());
         DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
+        panelAvatar.setImage(avatar);
         fieldMemberID.setText(member.getID());
         fieldFullName.setText(member.getFullName());
         setDateOfBirth(member.getDateOfBirth());

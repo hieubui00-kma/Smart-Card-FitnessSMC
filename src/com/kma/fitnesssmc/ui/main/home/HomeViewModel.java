@@ -23,7 +23,7 @@ public class HomeViewModel {
         return memberRepository.getMember();
     }
 
-    public Image getImage(byte[] data) {
+    public @Nullable Image getImage(byte[] data) {
         return new ImageIcon(data).getImage();
     }
 

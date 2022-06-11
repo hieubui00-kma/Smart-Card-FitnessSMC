@@ -75,10 +75,7 @@ public class MemberRepository {
             return null;
         }
 
-        if (avatar != null) {
-            updateAvatar(avatar);
-        }
-
+        updateAvatar(avatar);
         return member;
     }
 
@@ -194,7 +191,8 @@ public class MemberRepository {
     public boolean updateProfile(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber
+        @NotNull String phoneNumber,
+        byte[] avatar
     ) throws CardException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
@@ -207,6 +205,7 @@ public class MemberRepository {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
+        updateAvatar(avatar);
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
