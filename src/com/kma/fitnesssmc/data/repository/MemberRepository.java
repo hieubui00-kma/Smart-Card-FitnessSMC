@@ -96,14 +96,27 @@ public class MemberRepository {
             CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_PROFILE, 0x00);
             ResponseAPDU response = sessionManager.transmit(getCommand);
 
-            return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? parseMemberData(response.getData()) : null;
+            if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
+                return null;
+            }
+
+            Member member = parseData(response.getData());
+
+            if (member == null) {
+                return null;
+            }
+
+            byte[] avatar = getAvatar();
+
+            member.setAvatar(avatar);
+            return member;
         } catch (CardException | ParseException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private @Nullable Member parseMemberData(byte[] rawData) throws ParseException {
+    private @Nullable Member parseData(byte[] rawData) throws ParseException {
         if (rawData.length < 1) {  // Data is empty because member isn't initialized
             return null;
         }
@@ -143,6 +156,13 @@ public class MemberRepository {
         member.setExpirationDate(dateFormat.parse(expirationDate));
         member.setRemainingBalance(remainingBalance);
         return member;
+    }
+
+    public byte[] getAvatar() throws CardException {
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_AVATAR, 0x00);
+        ResponseAPDU response = sessionManager.transmit(getCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
     }
 
     public @Nullable Long getRemainingBalance() throws CardException {
