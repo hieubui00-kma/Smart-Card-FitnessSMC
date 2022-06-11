@@ -4,7 +4,6 @@ import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.ImagePanel;
-import com.kma.fitnesssmc.ui.main.component.PasswordField;
 import com.kma.fitnesssmc.ui.main.component.TextField;
 import org.jdatepicker.impl.DateComponentFormatter;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -14,6 +13,9 @@ import org.jdatepicker.impl.UtilDateModel;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 
@@ -36,9 +38,9 @@ public class CreateMemberPanel extends JPanel {
 
     private final TextField fieldPhoneNumber = new TextField();
 
-    private final PasswordField fieldNewPin = new PasswordField();
+    private final JTextField fieldExpirationDate = new JTextField();
 
-    private final PasswordField fieldConfirmNewPin = new PasswordField();
+    private final JTextField fieldRemainingBalance = new JTextField();
 
     private final JButton btnSubmit = new JButton("Submit");
 
@@ -61,7 +63,7 @@ public class CreateMemberPanel extends JPanel {
         setupFullNameField();
         setupDateOfBirthPicker();
         setupPhoneNumberField();
-        setupNewPinField();
+        setupExpirationDateField();
         setupConfirmNewPinField();
         setupSubmitButton();
 
@@ -109,7 +111,7 @@ public class CreateMemberPanel extends JPanel {
     private void setupFullNameField() {
         JLabel labelFullName = new JLabel("Full name:");
         final int x = panelAvatar.getX() + panelAvatar.getWidth() + 56;
-        final int y = panelAvatar.getY();
+        final int y = panelAvatar.getY() - 2;
 
         // Setup Full name label
         labelFullName.setBounds(x, y, 72, 22);
@@ -185,62 +187,65 @@ public class CreateMemberPanel extends JPanel {
         add(fieldPhoneNumber);
     }
 
-    private void setupNewPinField() {
-        JLabel labelNewPin = new JLabel("New PIN:");
+    private void setupExpirationDateField() {
+        JLabel labelExpirationDate = new JLabel("Expiration Date:");
         final int y = fieldPhoneNumber.getY() + fieldPhoneNumber.getHeight() + 16;
 
         // Setup New Pin label
-        labelNewPin.setBounds(fieldPhoneNumber.getX(), y, 62, 24);
-        labelNewPin.setFont(new Font("Arial", Font.BOLD, 14));
-        labelNewPin.setHorizontalAlignment(SwingConstants.CENTER);
-        labelNewPin.setVerticalAlignment(SwingConstants.CENTER);
+        labelExpirationDate.setBounds(fieldPhoneNumber.getX(), y, 128, 24);
+        labelExpirationDate.setFont(new Font("Arial", Font.BOLD, 14));
+        labelExpirationDate.setHorizontalAlignment(SwingConstants.LEFT);
+        labelExpirationDate.setVerticalAlignment(SwingConstants.CENTER);
 
         // Setup New Pin field
-        final int width = WIDTH_FRAME - 24 - fieldPhoneNumber.getX();
+        final int width = WIDTH_FRAME - 32 - fieldPhoneNumber.getX();
+        final Date now = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
+        String nowFormatted = dateFormat.format(now);
 
-        fieldNewPin.setBounds(fieldPhoneNumber.getX(), y + labelNewPin.getHeight() + 8, width, 32);
-        fieldNewPin.setFont(new Font("Arial", Font.PLAIN, 14));
-        fieldNewPin.setMaxLength(6);
-        fieldNewPin.setDigits(new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
-        fieldNewPin.setBorder(BorderFactory.createCompoundBorder(
-            fieldNewPin.getBorder(),
+        fieldExpirationDate.setBounds(fieldPhoneNumber.getX(), y + labelExpirationDate.getHeight() + 8, width, 32);
+        fieldExpirationDate.setFont(new Font("Arial", Font.BOLD, 14));
+        fieldExpirationDate.setText(nowFormatted);
+        fieldExpirationDate.setEditable(false);
+        fieldExpirationDate.setBorder(BorderFactory.createCompoundBorder(
+            fieldExpirationDate.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)
         ));
 
-        add(labelNewPin);
-        add(fieldNewPin);
+        add(labelExpirationDate);
+        add(fieldExpirationDate);
     }
 
     private void setupConfirmNewPinField() {
-        JLabel labelConfirmNewPin = new JLabel("Confirm New PIN:");
-        final int y = fieldNewPin.getY() + fieldNewPin.getHeight() + 16;
+        JLabel labelRemainingBalance = new JLabel("Remaining Balance:");
+        final int y = fieldExpirationDate.getY() + fieldExpirationDate.getHeight() + 16;
 
         // Setup Confirm New Pin label
-        labelConfirmNewPin.setBounds(fieldNewPin.getX(), y, 120, 24);
-        labelConfirmNewPin.setFont(new Font("Arial", Font.BOLD, 14));
-        labelConfirmNewPin.setHorizontalAlignment(SwingConstants.CENTER);
-        labelConfirmNewPin.setVerticalAlignment(SwingConstants.CENTER);
+        labelRemainingBalance.setBounds(fieldExpirationDate.getX(), y, 156, 24);
+        labelRemainingBalance.setFont(new Font("Arial", Font.BOLD, 14));
+        labelRemainingBalance.setHorizontalAlignment(SwingConstants.LEFT);
+        labelRemainingBalance.setVerticalAlignment(SwingConstants.CENTER);
 
         // Setup Confirm New Pin field
-        final int width = WIDTH_FRAME - 24 - fieldNewPin.getX();
+        final int width = WIDTH_FRAME - 24 - fieldExpirationDate.getX();
 
-        fieldConfirmNewPin.setBounds(fieldNewPin.getX(), y + labelConfirmNewPin.getHeight() + 8, width, 32);
-        fieldConfirmNewPin.setFont(new Font("Arial", Font.PLAIN, 14));
-        fieldConfirmNewPin.setMaxLength(6);
-        fieldConfirmNewPin.setDigits(new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'});
-        fieldConfirmNewPin.setBorder(BorderFactory.createCompoundBorder(
-            fieldConfirmNewPin.getBorder(),
-            BorderFactory.createEmptyBorder(4, 8, 4, 8)
+        fieldRemainingBalance.setBounds(fieldExpirationDate.getX(), y + labelRemainingBalance.getHeight() + 8, width, 32);
+        fieldRemainingBalance.setFont(new Font("Arial", Font.BOLD, 14));
+        fieldRemainingBalance.setText("0 VND");
+        fieldRemainingBalance.setEditable(false);
+        fieldRemainingBalance.setBorder(BorderFactory.createCompoundBorder(
+            fieldRemainingBalance.getBorder(),
+            BorderFactory.createEmptyBorder(0, 8, 0, 8)
         ));
 
-        add(labelConfirmNewPin);
-        add(fieldConfirmNewPin);
+        add(labelRemainingBalance);
+        add(fieldRemainingBalance);
     }
 
     private void setupSubmitButton() {
         final int width = 124;
-        final int x = fieldConfirmNewPin.getX() + (fieldConfirmNewPin.getWidth() - width) / 2;
-        final int y = fieldConfirmNewPin.getY() + fieldConfirmNewPin.getHeight() + 16;
+        final int x = fieldRemainingBalance.getX() + (fieldRemainingBalance.getWidth() - width) / 2;
+        final int y = fieldRemainingBalance.getY() + fieldRemainingBalance.getHeight() + 20;
 
         btnSubmit.setBounds(x, y, width, 32);
         btnSubmit.setFont(new Font("Arial", Font.BOLD, 16));
@@ -273,9 +278,7 @@ public class CreateMemberPanel extends JPanel {
         String fullName = fieldFullName.getText().trim();
         Date dateOfBirth = (Date) datePicker.getModel().getValue();
         String phoneNumber = fieldPhoneNumber.getText();
-        String newPin = new String(fieldNewPin.getPassword());
-        String confirmNewPin = new String(fieldConfirmNewPin.getPassword());
-        String errorMessage = viewModel.createMember(fullName, dateOfBirth, phoneNumber, newPin, confirmNewPin);
+        String errorMessage = viewModel.createMember(fullName, dateOfBirth, phoneNumber);
 
         if (errorMessage != null) {
             showMessageDialog(this, errorMessage, "Error", ERROR_MESSAGE);
