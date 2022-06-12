@@ -6,6 +6,8 @@ import com.kma.fitnesssmc.data.repository.MemberRepository;
 import org.jetbrains.annotations.Nullable;
 
 import javax.smartcardio.CardException;
+import javax.swing.*;
+import java.awt.*;
 
 public class HomeViewModel {
     private final SessionManager sessionManager;
@@ -19,6 +21,10 @@ public class HomeViewModel {
 
     public @Nullable Member getMember() {
         return memberRepository.getMember();
+    }
+
+    public @Nullable Image getImage(byte[] data) {
+        return new ImageIcon(data).getImage();
     }
 
     public void disconnect() {
