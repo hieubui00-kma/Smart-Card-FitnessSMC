@@ -30,7 +30,7 @@ public class ConnectViewModel {
             Integer retriesRemaining;
 
             sessionManager.connect();
-            retriesRemaining = memberRepository.verify(pin);
+            retriesRemaining = memberRepository.authentication(pin);
 
             if (retriesRemaining == null) {
                 return null;

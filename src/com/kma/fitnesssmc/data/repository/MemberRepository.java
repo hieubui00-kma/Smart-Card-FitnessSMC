@@ -25,17 +25,31 @@ public class MemberRepository {
         this.sessionManager = sessionManager;
     }
 
-    public Integer verify(@NotNull String pin) throws CardException {
-        CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_VERIFY_MEMBER, 0x00, 0x00, pin.getBytes());
+    /**
+     * Authenticate the card that was connected to the application
+     *
+     * @param PIN the card PIN code
+     * @return the retries remaining when authentication has failed or NULL when authentication has successfully
+     * @throws CardException if card is not connected
+     */
+    public Integer authentication(@NotNull String PIN) throws CardException {
+        byte[] data = PIN.getBytes();
+        CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_AUTHENTICATION_MEMBER, 0x00, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(verifyCommand);
 
-        if (response.getSW1() == 0x90 && response.getSW2() == 0x00) {
-            return null;
-        }
-
-        return (int) response.getData()[0];
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? null : (int) response.getData()[0];
     }
 
+    /**
+     * Create a new member for the connected card
+     *
+     * @param fullName    the full name of new member
+     * @param dateOfBirth the date of birth of new member
+     * @param phoneNumber the phone number of new member
+     * @param avatar      the avatar of new member
+     * @return the new member that was created successfully or NULL when create has failed
+     * @throws CardException if card is not connected
+     */
     public @Nullable Member createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
@@ -53,7 +67,7 @@ public class MemberRepository {
         member.setPhoneNumber(phoneNumber);
         member.setAvatar(avatar);
         member.setExpirationDate(now);
-        member.setRemainingBalance(0);
+        member.setRemainingBalance(0L);
 
         // Parse new member to data bytes
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -79,6 +93,11 @@ public class MemberRepository {
         return member;
     }
 
+    /**
+     * Generate random ID for member
+     *
+     * @return member ID
+     */
     private @NotNull String createMemberID() {
         Random random = new Random();
         int max = 99999999;
@@ -88,6 +107,11 @@ public class MemberRepository {
         return String.valueOf(memberID);
     }
 
+    /**
+     * Get member's profile already stored in the connected card
+     *
+     * @return the member's profile has been stored in the card or NULL when member isn't initialized
+     */
     public @Nullable Member getMember() {
         try {
             CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_PROFILE, 0x00);
@@ -113,6 +137,13 @@ public class MemberRepository {
         }
     }
 
+    /**
+     * Parse the member raw data received from the card into a Member object
+     *
+     * @param rawData the member raw data received from the card
+     * @return the member that was parsed from the member raw data
+     * @throws ParseException if raw data is invalid
+     */
     private @Nullable Member parseData(byte[] rawData) throws ParseException {
         if (rawData.length < 1) {  // Data is empty because member isn't initialized
             return null;
@@ -155,6 +186,12 @@ public class MemberRepository {
         return member;
     }
 
+    /**
+     * Get member's avatar already stored in the connected card
+     *
+     * @return the member's avatar has been stored in the card or NULL when member isn't initialized or has no data
+     * @throws CardException if card is not connected
+     */
     public byte[] getAvatar() throws CardException {
         CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_AVATAR, 0x00);
         ResponseAPDU response = sessionManager.transmit(getCommand);
@@ -162,32 +199,48 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
     }
 
+    /**
+     * Get member's remaining balance already stored in the connected card
+     *
+     * @return the member's remaining balance has been stored in the card or NULL when member isn't initialized or data is invalid
+     * @throws CardException if card is not connected
+     */
     public @Nullable Long getRemainingBalance() throws CardException {
         CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_REMAINING_BALANCE, 0x00);
         ResponseAPDU response = sessionManager.transmit(getCommand);
 
-        if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
-            return null;
-        }
-
-        return Long.parseLong(new String(response.getData()));
+        return response.getSW1() != 0x90 || response.getSW2() != 0x00 ? null : Long.parseLong(new String(response.getData()));
     }
 
+    /**
+     * Update PIN that already stored in the connected card
+     *
+     * @param currentPIN the existing PIN stored in the card
+     * @param newPIN     a new PIN that replaces the existing PIN stored in the card
+     * @return the retries remaining when current PIN is incorrect or NULL when update PIN has successfully
+     * @throws CardException if card is not connected
+     */
     public Integer updatePin(
         @NotNull String currentPIN,
         @NotNull String newPIN
     ) throws CardException {
-        String data = (char) currentPIN.length() + currentPIN + (char) newPIN.length() + newPIN;
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data.getBytes());
+        byte[] data = ((char) currentPIN.length() + currentPIN + (char) newPIN.length() + newPIN).getBytes();
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-        if (response.getSW1() == 0x90 && response.getSW2() == 0x00) {
-            return null;
-        }
-
-        return (int) response.getData()[0];
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? null : (int) response.getData()[0];
     }
 
+    /**
+     * Update member's profile that already stored in the connected card
+     *
+     * @param fullName    the full name of new member
+     * @param dateOfBirth the date of birth of new member
+     * @param phoneNumber the phone number of new member
+     * @param avatar      the avatar of new member
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
     public boolean updateProfile(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
@@ -209,20 +262,35 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    private void updateAvatar(byte[] avatar) throws CardException {
+    /**
+     * Update member's avatar that already stored in the connected card
+     *
+     * @param avatar the new member's avatar
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
+    public boolean updateAvatar(byte[] avatar) throws CardException {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_AVATAR, 0x00, avatar);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-        sessionManager.transmit(updateCommand);
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
-    public boolean recharge(long balance) throws CardException {
+    /**
+     * Recharge the balance for member and save to card
+     *
+     * @param amount amount want to recharge
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
+    public boolean recharge(long amount) throws CardException {
         Long currentRemainingBalance = getRemainingBalance();
 
         if (currentRemainingBalance == null) {
             return false;
         }
 
-        byte[] data = String.valueOf(currentRemainingBalance + balance).getBytes();
+        byte[] data = String.valueOf(currentRemainingBalance + amount).getBytes();
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
