@@ -8,11 +8,11 @@ public enum EpisodePack {
 
     private final String name;
 
-    private final long duration;
+    private final int duration;
 
     private final long price;
 
-    EpisodePack(String name, long duration, long price) {
+    EpisodePack(String name, int duration, long price) {
         this.name = name;
         this.duration = duration;
         this.price = price;
@@ -22,7 +22,7 @@ public enum EpisodePack {
         return name;
     }
 
-    public long getDuration() {
+    public int getDuration() {
         return duration;
     }
 

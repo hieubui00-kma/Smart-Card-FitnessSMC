@@ -11,8 +11,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
-import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
+import static com.kma.fitnesssmc.util.Constants.*;
 import static javax.swing.SwingUtilities.getWindowAncestor;
 
 public class PaymentPanel extends JPanel {
@@ -155,7 +154,32 @@ public class PaymentPanel extends JPanel {
     }
 
     private void setEvents() {
+        btnPayment.addActionListener(event -> payment());
+
         btnBack.addActionListener(event -> navigateToHome());
+    }
+
+    private void payment() {
+        EpisodePack episodePack = (EpisodePack) boxEpisodePacks.getSelectedItem();
+        String PIN = new String(fieldPIN.getPassword());
+        String errorMessage = viewModel.payment(episodePack, PIN);
+
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+            if (errorMessage.equals(ERROR_MESSAGE_CARD_HAS_BLOCKED)) {
+                navigateToConnect();
+            }
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Payment successful!", "Notification", JOptionPane.INFORMATION_MESSAGE);
+        fieldPIN.setText(null);
+        getMember();
+    }
+
+    private void navigateToConnect() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToConnect();
     }
 
     private void navigateToHome() {

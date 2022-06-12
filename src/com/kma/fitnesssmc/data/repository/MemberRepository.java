@@ -2,6 +2,7 @@ package com.kma.fitnesssmc.data.repository;
 
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.util.EpisodePack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -269,8 +270,25 @@ public class MemberRepository {
      * @return true when update has successfully otherwise false when update failed
      * @throws CardException if card is not connected
      */
-    public boolean updateAvatar(byte[] avatar) throws CardException {
+    private boolean updateAvatar(byte[] avatar) throws CardException {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_AVATAR, 0x00, avatar);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+    }
+
+    private boolean updateExpirationDate(@NotNull Date date) throws CardException {
+        String dateFormat = new SimpleDateFormat("yyyy-MM-dd").format(date);
+        byte[] data = dateFormat.getBytes();
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_EXPIRATION_DATE, 0x00, data);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+    }
+
+    private boolean updateRemainingBalance(long remainingBalance) throws CardException {
+        byte[] data = String.valueOf(remainingBalance).getBytes();
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
@@ -286,14 +304,41 @@ public class MemberRepository {
     public boolean recharge(long amount) throws CardException {
         Long currentRemainingBalance = getRemainingBalance();
 
-        if (currentRemainingBalance == null) {
+        return currentRemainingBalance != null && updateRemainingBalance(currentRemainingBalance + amount);
+    }
+
+    public boolean payment(
+        @NotNull EpisodePack episodePack,
+        @NotNull String PIN
+    ) throws CardException, RuntimeException {
+        Integer retriesRemaining = authentication(PIN);
+
+        if (retriesRemaining != null) {
+            if (retriesRemaining == 0) {
+                throw new RuntimeException(ERROR_MESSAGE_CARD_HAS_BLOCKED);
+            }
+
+            throw new RuntimeException("Your PIN is incorrect!");
+        }
+
+        Member member = getMember();
+
+        if (member == null) {
             return false;
         }
 
-        byte[] data = String.valueOf(currentRemainingBalance + amount).getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
-        ResponseAPDU response = sessionManager.transmit(updateCommand);
+        if (episodePack.getPrice() > member.getRemainingBalance()) {
+            throw new RuntimeException("Your remaining balance is not enough");
+        }
 
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
+        if (!updateRemainingBalance(member.getRemainingBalance() - episodePack.getPrice())) {
+            return false;
+        }
+
+        Calendar calendar = Calendar.getInstance();
+
+        calendar.setTime(member.getExpirationDate());
+        calendar.add(Calendar.MONTH, episodePack.getDuration());
+        return updateExpirationDate(calendar.getTime());
     }
 }

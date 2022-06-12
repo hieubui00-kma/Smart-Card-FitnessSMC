@@ -15,6 +15,7 @@ public class Constants {
 
     public static final int P1_PROFILE = 0x00;
     public static final int P1_AVATAR = 0x03;
+    public static final int P1_EXPIRATION_DATE = 0x04;
     public static final int P1_REMAINING_BALANCE = 0x05;
     public static final int P1_PIN = 0x06;
 
