@@ -277,6 +277,13 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
+    /**
+     * Update member's expiration date in the connected card
+     *
+     * @param date the new member's expiration date that will update
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
     private boolean updateExpirationDate(@NotNull Date date) throws CardException {
         String dateFormat = new SimpleDateFormat("yyyy-MM-dd").format(date);
         byte[] data = dateFormat.getBytes();
@@ -286,6 +293,13 @@ public class MemberRepository {
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
+    /**
+     * Update member's remaining balance in the connected card
+     *
+     * @param remainingBalance the new member's remaining balance that will update
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
     private boolean updateRemainingBalance(long remainingBalance) throws CardException {
         byte[] data = String.valueOf(remainingBalance).getBytes();
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
@@ -307,6 +321,14 @@ public class MemberRepository {
         return currentRemainingBalance != null && updateRemainingBalance(currentRemainingBalance + amount);
     }
 
+    /**
+     * Payment the Episode Pack for member and save to card
+     *
+     * @param episodePack the Episode Pack that member want to payment
+     * @param PIN the existing PIN stored in the card
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
     public boolean payment(
         @NotNull EpisodePack episodePack,
         @NotNull String PIN
