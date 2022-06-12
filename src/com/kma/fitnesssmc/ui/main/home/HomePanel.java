@@ -311,6 +311,8 @@ public class HomePanel extends JPanel {
 
         btnRecharge.addActionListener(event -> navigateToRecharge());
 
+        btnPayment.addActionListener(event -> navigateToPayment());
+
         btnExit.addActionListener(event -> exit());
     }
 
@@ -327,6 +329,11 @@ public class HomePanel extends JPanel {
     private void navigateToRecharge() {
         MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
         mainFrame.navigateToRecharge();
+    }
+
+    private void navigateToPayment() {
+        MainFrame mainFrame = (MainFrame) getWindowAncestor(this);
+        mainFrame.navigateToPayment();
     }
 
     private void exit() {
