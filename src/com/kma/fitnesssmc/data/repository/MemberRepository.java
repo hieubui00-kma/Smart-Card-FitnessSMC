@@ -9,6 +9,10 @@ import org.jetbrains.annotations.Nullable;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.security.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,13 +21,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Random;
 
+import static com.kma.fitnesssmc.util.Bytes.*;
 import static com.kma.fitnesssmc.util.Constants.*;
+import static com.kma.fitnesssmc.util.RSA.generatePublicKey;
 
 public class MemberRepository {
     private final SessionManager sessionManager;
 
-    public MemberRepository(@NotNull SessionManager sessionManager) {
+    private final File dataStorage;
+
+    public MemberRepository(
+        @NotNull SessionManager sessionManager,
+        @NotNull File dataStorage
+    ) {
         this.sessionManager = sessionManager;
+        this.dataStorage = dataStorage;
     }
 
     /**
@@ -90,6 +102,7 @@ public class MemberRepository {
             return null;
         }
 
+        generateKey(memberID, createResponse.getData());
         updateAvatar(avatar);
         return member;
     }
@@ -106,6 +119,25 @@ public class MemberRepository {
         int memberID = random.nextInt((max - min) + 1) + min;
 
         return String.valueOf(memberID);
+    }
+
+    private void generateKey(String memberID, byte[] data) {
+        int offset = 0x00;
+        int exponentLength = makeInteger(data, offset);
+        int modulusLength = makeInteger(data, offset + 2 + exponentLength);
+        byte[] exponentBytes = copyOfRange(data, offset + 2, exponentLength);
+        byte[] modulusBytes = copyOfRange(data, offset + 2 + exponentLength + 2, modulusLength);
+        PublicKey publicKey = generatePublicKey(exponentBytes, modulusBytes);
+
+        if (publicKey == null) {
+            return;
+        }
+
+        try (FileWriter fileWriter = new FileWriter(dataStorage, true)) {
+            fileWriter.write(memberID + "#" + toHexString(publicKey.getEncoded()) + "\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

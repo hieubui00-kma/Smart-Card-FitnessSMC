@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
+import com.kma.fitnesssmc.data.manager.FileManager;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
@@ -72,7 +73,10 @@ public class CreateMemberPanel extends JPanel {
 
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
-        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        FileManager fileManager = FileManager.getInstance();
+        File dataStorage = fileManager.getDataStorage();
+        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+
         viewModel = new CreateMemberViewModel(memberRepository);
     }
 

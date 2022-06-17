@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.recharge;
 
+import com.kma.fitnesssmc.data.manager.FileManager;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
@@ -9,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
@@ -49,7 +51,10 @@ public class RechargePanel extends JPanel {
 
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
-        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        FileManager fileManager = FileManager.getInstance();
+        File dataStorage = fileManager.getDataStorage();
+        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+
         viewModel = new RechargeViewModel(memberRepository);
     }
 
