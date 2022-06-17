@@ -3,16 +3,15 @@ package com.kma.fitnesssmc.data.repository;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.util.EpisodePack;
+import com.kma.fitnesssmc.util.RSA;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.security.*;
+import java.io.*;
+import java.security.PublicKey;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -385,14 +384,68 @@ public class MemberRepository {
             throw new RuntimeException("Your remaining balance is not enough");
         }
 
-        if (!updateRemainingBalance(member.getRemainingBalance() - episodePack.getPrice())) {
-            return false;
+        accuracy(member.getID());
+        if (updateRemainingBalance(member.getRemainingBalance() - episodePack.getPrice())) {
+            Calendar calendar = Calendar.getInstance();
+
+            calendar.setTime(member.getExpirationDate());
+            calendar.add(Calendar.MONTH, episodePack.getDuration());
+            return updateExpirationDate(calendar.getTime());
         }
 
-        Calendar calendar = Calendar.getInstance();
+        return false;
+    }
 
-        calendar.setTime(member.getExpirationDate());
-        calendar.add(Calendar.MONTH, episodePack.getDuration());
-        return updateExpirationDate(calendar.getTime());
+    private void accuracy(@NotNull String memberID) throws CardException, RuntimeException {
+        Random random = new Random();
+        String code = String.valueOf(random.nextInt(900000) + 100000);
+        byte[] signature = getSignature(code);
+        PublicKey key = getPublicKey(memberID);
+
+        if (key == null) {
+            throw new RuntimeException("Authentication failed!");
+        }
+
+        if (RSA.accuracy(signature, key, code)) {
+            return;
+        }
+
+        throw new RuntimeException("Authentication failed!");
+    }
+
+    private byte[] getSignature(@NotNull String code) throws CardException {
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_SIGNATURE, 0x00, code.getBytes());
+        ResponseAPDU response = sessionManager.transmit(getCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
+    }
+
+    private @Nullable PublicKey getPublicKey(String memberID) {
+        try (FileReader fileReader = new FileReader(dataStorage)) {
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
+            String line = bufferedReader.readLine();
+            String[] data;
+
+
+            while (line != null) {
+                if (line.isBlank()) {
+                    continue;
+                }
+
+                data = line.split("#");
+                if (data[0].equals(memberID)) {
+                    bufferedReader.close();
+                    return RSA.generatePublicKey(fromHexString(data[1]));
+                }
+
+                line = bufferedReader.readLine();
+            }
+
+            bufferedReader.close();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
