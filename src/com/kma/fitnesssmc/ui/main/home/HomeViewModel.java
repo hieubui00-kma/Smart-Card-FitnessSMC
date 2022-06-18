@@ -30,8 +30,7 @@ public class HomeViewModel {
     public void disconnect() {
         try {
             sessionManager.disconnect();
-        } catch (CardException e) {
-            e.printStackTrace();
+        } catch (CardException ignored) {
         }
     }
 }

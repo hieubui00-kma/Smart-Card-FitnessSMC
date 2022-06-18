@@ -159,7 +159,9 @@ public class MemberRepository {
 
             member.setAvatar(avatar);
             return member;
-        } catch (CardException | ParseException e) {
+        } catch (CardException e) {
+            return null;
+        } catch (ParseException e) {
             e.printStackTrace();
             return null;
         }
