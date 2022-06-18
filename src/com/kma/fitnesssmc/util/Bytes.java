@@ -6,7 +6,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+
+import static java.lang.Character.digit;
 
 public class Bytes {
 
@@ -24,16 +25,39 @@ public class Bytes {
         }
     }
 
-    public static long toLong(byte[] bytes) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.put(bytes);
-        buffer.flip();  // need flip
-        return buffer.getLong();
+    public static int makeInteger(byte[] bytes, int offset) {
+        return ((int) bytes[offset] << 8) + ((int) bytes[offset + 1] & 255);
     }
 
-    public static byte @NotNull [] fromLong(long x) {
-        ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        buffer.putLong(x);
-        return buffer.array();
+    public static byte[] copyOfRange(byte[] original, int offset, int length) {
+        if (length < 0) {
+            throw new IllegalArgumentException("length is negative");
+        }
+
+        byte[] result = new byte[length];
+
+        System.arraycopy(original, offset, result, 0, Math.min(original.length - offset, length));
+        return result;
+    }
+
+    public static String toHexString(byte[] bytes) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String data;
+
+        for (byte _byte : bytes) {
+            data = String.format("%02X", _byte);
+            stringBuilder.append(data);
+        }
+        return stringBuilder.toString();
+    }
+
+    public static byte[] fromHexString(@NotNull String data) {
+        int length = data.length();
+        byte[] result = new byte[length / 2];
+
+        for (int i = 0; i < length; i += 2) {
+            result[i / 2] = (byte) ((digit(data.charAt(i), 16) << 4) + digit(data.charAt(i + 1), 16));
+        }
+        return result;
     }
 }

@@ -18,6 +18,7 @@ public class Constants {
     public static final int P1_EXPIRATION_DATE = 0x04;
     public static final int P1_REMAINING_BALANCE = 0x05;
     public static final int P1_PIN = 0x06;
+    public static final int P1_SIGNATURE = 0x07;
 
     public static final String ERROR_MESSAGE_CARD_HAS_BLOCKED = "Card has blocked!";
 }

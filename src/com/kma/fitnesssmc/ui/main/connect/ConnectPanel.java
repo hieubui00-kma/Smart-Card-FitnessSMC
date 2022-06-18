@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.connect;
 
+import com.kma.fitnesssmc.data.manager.FileManager;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
@@ -7,6 +8,7 @@ import com.kma.fitnesssmc.ui.main.component.PasswordField;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 
 import static com.kma.fitnesssmc.util.Constants.HEIGHT_FRAME;
 import static com.kma.fitnesssmc.util.Constants.WIDTH_FRAME;
@@ -44,7 +46,10 @@ public class ConnectPanel extends JPanel {
 
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
-        MemberRepository memberRepository = new MemberRepository(sessionManager);
+        FileManager fileManager = FileManager.getInstance();
+        File dataStorage = fileManager.getDataStorage();
+        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+
         viewModel = new ConnectViewModel(sessionManager, memberRepository);
     }
 
