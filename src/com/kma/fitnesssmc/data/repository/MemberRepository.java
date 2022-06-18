@@ -46,7 +46,7 @@ public class MemberRepository {
      */
     public Integer authentication(@NotNull String PIN) throws CardException {
         byte[] data = PIN.getBytes();
-        CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_AUTHENTICATION_MEMBER, 0x00, 0x00, data);
+        CommandAPDU verifyCommand = new CommandAPDU(0x00, INS_AUTHENTICATION, 0x00, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(verifyCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? null : (int) response.getData()[0];
@@ -94,7 +94,7 @@ public class MemberRepository {
         ).getBytes();
 
         // Transmit create member command
-        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE_MEMBER, 0x00, 0x00, data);
+        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE, P1_MEMBER, 0x00, data);
         ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
         if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
@@ -146,7 +146,7 @@ public class MemberRepository {
      */
     public @Nullable Member getMember() {
         try {
-            CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_PROFILE, 0x00);
+            CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET, P1_MEMBER, P2_PROFILE);
             ResponseAPDU response = sessionManager.transmit(getCommand);
 
             if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
@@ -225,7 +225,7 @@ public class MemberRepository {
      * @throws CardException if card is not connected
      */
     public byte[] getAvatar() throws CardException {
-        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_AVATAR, 0x00);
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET, P1_MEMBER, P2_AVATAR);
         ResponseAPDU response = sessionManager.transmit(getCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
@@ -238,7 +238,7 @@ public class MemberRepository {
      * @throws CardException if card is not connected
      */
     public @Nullable Long getRemainingBalance() throws CardException {
-        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_REMAINING_BALANCE, 0x00);
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET, P1_MEMBER, P2_REMAINING_BALANCE);
         ResponseAPDU response = sessionManager.transmit(getCommand);
 
         return response.getSW1() != 0x90 || response.getSW2() != 0x00 ? null : Long.parseLong(new String(response.getData()));
@@ -257,7 +257,7 @@ public class MemberRepository {
         @NotNull String newPIN
     ) throws CardException {
         byte[] data = ((char) currentPIN.length() + currentPIN + (char) newPIN.length() + newPIN).getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PIN, 0x00, data);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_PIN, 0x00, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? null : (int) response.getData()[0];
@@ -287,7 +287,7 @@ public class MemberRepository {
             (char) phoneNumber.length() + phoneNumber
         ).getBytes();
 
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_PROFILE, 0x00, data);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_PROFILE, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         updateAvatar(avatar);
@@ -302,7 +302,7 @@ public class MemberRepository {
      * @throws CardException if card is not connected
      */
     private boolean updateAvatar(byte[] avatar) throws CardException {
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_AVATAR, 0x00, avatar);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_AVATAR, avatar);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
@@ -318,7 +318,7 @@ public class MemberRepository {
     private boolean updateExpirationDate(@NotNull Date date) throws CardException {
         String dateFormat = new SimpleDateFormat("yyyy-MM-dd").format(date);
         byte[] data = dateFormat.getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_EXPIRATION_DATE, 0x00, data);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_EXPIRATION_DATE, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
@@ -333,7 +333,7 @@ public class MemberRepository {
      */
     private boolean updateRemainingBalance(long remainingBalance) throws CardException {
         byte[] data = String.valueOf(remainingBalance).getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE_MEMBER, P1_REMAINING_BALANCE, 0x00, data);
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_REMAINING_BALANCE, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
@@ -414,7 +414,7 @@ public class MemberRepository {
     }
 
     private byte[] getSignature(@NotNull String code) throws CardException {
-        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET_MEMBER, P1_SIGNATURE, 0x00, code.getBytes());
+        CommandAPDU getCommand = new CommandAPDU(0x00, INS_CREATE, P1_SIGNATURE, 0x00, code.getBytes());
         ResponseAPDU response = sessionManager.transmit(getCommand);
 
         return response.getSW1() == 0x90 && response.getSW2() == 0x00 ? response.getData() : null;
