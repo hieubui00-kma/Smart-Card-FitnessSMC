@@ -289,7 +289,7 @@ public class CreateMemberPanel extends JPanel {
             return;
         }
 
-        showMessageDialog(this, "Create new member was successful.", null, INFORMATION_MESSAGE);
+        showMessageDialog(this, "Create new member was successful.", "Notification", INFORMATION_MESSAGE);
         navigateToHome();
     }
 

@@ -182,7 +182,7 @@ public class ChangePinPanel extends JPanel {
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Update PIN successful!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Update PIN successful!", "Notification", JOptionPane.INFORMATION_MESSAGE);
         fieldCurrentPIN.setText(null);
         fieldNewPIN.setText(null);
         fieldConfirmNewPIN.setText(null);

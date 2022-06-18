@@ -296,14 +296,14 @@ public class ProfilePanel extends JPanel {
         String fullName = fieldFullName.getText().trim();
         Date dateOfBirth = (Date) datePicker.getModel().getValue();
         String phoneNumber = fieldPhoneNumber.getText();
-        String errorMessage = viewModel.updateMemberProfile(fullName, dateOfBirth, phoneNumber);
+        String errorMessage = viewModel.updateProfile(fullName, dateOfBirth, phoneNumber);
 
         if (errorMessage != null) {
             JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        JOptionPane.showMessageDialog(this, "Update successful!", "Error", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, "Update successful!", "Notification", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void navigateToHome() {

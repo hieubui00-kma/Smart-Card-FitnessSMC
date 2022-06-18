@@ -58,15 +58,13 @@ public class MemberRepository {
      * @param fullName    the full name of new member
      * @param dateOfBirth the date of birth of new member
      * @param phoneNumber the phone number of new member
-     * @param avatar      the avatar of new member
      * @return the new member that was created successfully or NULL when create has failed
      * @throws CardException if card is not connected
      */
     public @Nullable Member createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber,
-        byte[] avatar
+        @NotNull String phoneNumber
     ) throws CardException {
         // Initialization new member
         String memberID = createMemberID();
@@ -77,7 +75,6 @@ public class MemberRepository {
         member.setFullName(fullName);
         member.setDateOfBirth(dateOfBirth);
         member.setPhoneNumber(phoneNumber);
-        member.setAvatar(avatar);
         member.setExpirationDate(now);
         member.setRemainingBalance(0L);
 
@@ -102,7 +99,6 @@ public class MemberRepository {
         }
 
         generateKey(memberID, createResponse.getData());
-        updateAvatar(avatar);
         return member;
     }
 
@@ -269,15 +265,13 @@ public class MemberRepository {
      * @param fullName    the full name of new member
      * @param dateOfBirth the date of birth of new member
      * @param phoneNumber the phone number of new member
-     * @param avatar      the avatar of new member
      * @return true when update has successfully otherwise false when update failed
      * @throws CardException if card is not connected
      */
     public boolean updateProfile(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
-        @NotNull String phoneNumber,
-        byte[] avatar
+        @NotNull String phoneNumber
     ) throws CardException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
@@ -290,7 +284,6 @@ public class MemberRepository {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_PROFILE, data);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 
-        updateAvatar(avatar);
         return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
@@ -301,7 +294,7 @@ public class MemberRepository {
      * @return true when update has successfully otherwise false when update failed
      * @throws CardException if card is not connected
      */
-    private boolean updateAvatar(byte[] avatar) throws CardException {
+    public boolean updateAvatar(byte[] avatar) throws CardException {
         CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_AVATAR, avatar);
         ResponseAPDU response = sessionManager.transmit(updateCommand);
 

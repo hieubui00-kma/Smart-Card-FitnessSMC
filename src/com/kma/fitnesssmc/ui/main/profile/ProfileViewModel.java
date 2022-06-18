@@ -26,7 +26,7 @@ public class ProfileViewModel {
         return memberRepository.getMember();
     }
 
-    public @Nullable String updateMemberProfile(String fullName, Date dateOfBirth, String phoneNumber) {
+    public @Nullable String updateProfile(String fullName, Date dateOfBirth, String phoneNumber) {
         String errorMessage = validate(fullName, dateOfBirth, phoneNumber);
 
         if (errorMessage != null) {
@@ -34,7 +34,11 @@ public class ProfileViewModel {
         }
 
         try {
-            return memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber, avatar) ? null : "Member profile update failed!";
+            if (memberRepository.updateProfile(fullName, dateOfBirth, phoneNumber)) {
+                return memberRepository.updateAvatar(avatar) ? null : "Member avatar update failed!";
+            }
+
+            return "Member profile update failed!";
         } catch (CardException e) {
             e.printStackTrace();
             return "Error! An error occurred. Please try again later.";

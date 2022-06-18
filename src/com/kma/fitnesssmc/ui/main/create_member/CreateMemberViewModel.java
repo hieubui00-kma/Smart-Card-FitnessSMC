@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.ui.main.create_member;
 
+import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.util.Bytes;
 import org.jetbrains.annotations.NotNull;
@@ -42,10 +43,19 @@ public class CreateMemberViewModel {
             return errorMessage;
         }
 
-        byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
+
 
         try {
-            return memberRepository.createMember(fullName, dateOfBirth, phoneNumber, avatar) != null ? null : "New member creation failed!";
+            Member member = memberRepository.createMember(fullName, dateOfBirth, phoneNumber);
+
+            if (member == null) {
+                return "New member creation failed!";
+            }
+
+            byte[] avatar = fileAvatar != null ? Bytes.fromFile(fileAvatar) : null;
+
+            memberRepository.updateAvatar(avatar);
+            return null;
         } catch (CardException e) {
             e.printStackTrace();
             return "Error! An error occurred. Please try again later.";
