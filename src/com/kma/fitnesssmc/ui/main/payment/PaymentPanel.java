@@ -1,12 +1,14 @@
 package com.kma.fitnesssmc.ui.main.payment;
 
+import com.kma.fitnesssmc.data.local.FitnessDatabase;
 import com.kma.fitnesssmc.data.manager.FileManager;
 import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.EpisodePack;
 import com.kma.fitnesssmc.data.model.Member;
+import com.kma.fitnesssmc.data.repository.EpisodePackRepository;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
 import com.kma.fitnesssmc.ui.main.MainFrame;
 import com.kma.fitnesssmc.ui.main.component.PasswordField;
-import com.kma.fitnesssmc.util.EpisodePack;
 
 import javax.swing.*;
 import java.awt.*;
@@ -57,12 +59,15 @@ public class PaymentPanel extends JPanel {
     }
 
     private void inject() {
+        FitnessDatabase database = FitnessDatabase.getInstance();
+        EpisodePackRepository episodePackRepository = new EpisodePackRepository(database);
+
         SessionManager sessionManager = SessionManager.getInstance();
         FileManager fileManager = FileManager.getInstance();
         File dataStorage = fileManager.getDataStorage();
         MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
 
-        viewModel = new PaymentViewModel(memberRepository);
+        viewModel = new PaymentViewModel(episodePackRepository, memberRepository);
     }
 
     private void setupTitleLabel() {
@@ -82,7 +87,7 @@ public class PaymentPanel extends JPanel {
 
         final int x = labelEpisodePacks.getX() + labelEpisodePacks.getWidth() + 48;
         DefaultComboBoxModel<EpisodePack> model = new DefaultComboBoxModel<>();
-        List<EpisodePack> episodePacks = List.of(EpisodePack.values());
+        List<EpisodePack> episodePacks = viewModel.getEpisodePacks();
 
         model.addAll(episodePacks);
         boxEpisodePacks.setBounds(x, (HEIGHT_FRAME - 32) / 2 - 32, 296, 32);

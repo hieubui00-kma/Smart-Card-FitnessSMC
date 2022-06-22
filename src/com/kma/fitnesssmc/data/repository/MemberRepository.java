@@ -1,8 +1,8 @@
 package com.kma.fitnesssmc.data.repository;
 
 import com.kma.fitnesssmc.data.manager.SessionManager;
+import com.kma.fitnesssmc.data.model.EpisodePack;
 import com.kma.fitnesssmc.data.model.Member;
-import com.kma.fitnesssmc.util.EpisodePack;
 import com.kma.fitnesssmc.util.RSA;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

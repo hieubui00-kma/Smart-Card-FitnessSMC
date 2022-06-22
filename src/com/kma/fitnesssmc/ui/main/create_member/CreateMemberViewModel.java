@@ -43,8 +43,6 @@ public class CreateMemberViewModel {
             return errorMessage;
         }
 
-
-
         try {
             Member member = memberRepository.createMember(fullName, dateOfBirth, phoneNumber);
 
@@ -57,7 +55,6 @@ public class CreateMemberViewModel {
             memberRepository.updateAvatar(avatar);
             return null;
         } catch (CardException e) {
-            e.printStackTrace();
             return "Error! An error occurred. Please try again later.";
         }
     }
