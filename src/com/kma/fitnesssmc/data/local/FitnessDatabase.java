@@ -29,6 +29,12 @@ public class FitnessDatabase {
         return statement.executeQuery(query);
     }
 
+    public boolean executeUpdate(String query) throws SQLException {
+        Statement statement = connection.createStatement();
+
+        return statement.executeUpdate(query) == 1;
+    }
+
     public void close() throws SQLException {
         connection.close();
     }

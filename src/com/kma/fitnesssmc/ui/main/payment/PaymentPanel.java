@@ -1,7 +1,6 @@
 package com.kma.fitnesssmc.ui.main.payment;
 
 import com.kma.fitnesssmc.data.local.FitnessDatabase;
-import com.kma.fitnesssmc.data.manager.FileManager;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.EpisodePack;
 import com.kma.fitnesssmc.data.model.Member;
@@ -12,7 +11,6 @@ import com.kma.fitnesssmc.ui.main.component.PasswordField;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.util.List;
 
 import static com.kma.fitnesssmc.util.Constants.*;
@@ -63,9 +61,7 @@ public class PaymentPanel extends JPanel {
         EpisodePackRepository episodePackRepository = new EpisodePackRepository(database);
 
         SessionManager sessionManager = SessionManager.getInstance();
-        FileManager fileManager = FileManager.getInstance();
-        File dataStorage = fileManager.getDataStorage();
-        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+        MemberRepository memberRepository = new MemberRepository(sessionManager, database);
 
         viewModel = new PaymentViewModel(episodePackRepository, memberRepository);
     }

@@ -1,6 +1,6 @@
 package com.kma.fitnesssmc.ui.main.home;
 
-import com.kma.fitnesssmc.data.manager.FileManager;
+import com.kma.fitnesssmc.data.local.FitnessDatabase;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
@@ -9,7 +9,6 @@ import com.kma.fitnesssmc.ui.main.component.ImagePanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -78,9 +77,8 @@ public class HomePanel extends JPanel {
 
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
-        FileManager fileManager = FileManager.getInstance();
-        File dataStorage = fileManager.getDataStorage();
-        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+        FitnessDatabase database = FitnessDatabase.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager, database);
 
         viewModel = new HomeViewModel(sessionManager, memberRepository);
     }
