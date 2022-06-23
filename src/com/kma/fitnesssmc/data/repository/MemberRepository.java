@@ -1,5 +1,6 @@
 package com.kma.fitnesssmc.data.repository;
 
+import com.kma.fitnesssmc.data.local.FitnessDatabase;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.EpisodePack;
 import com.kma.fitnesssmc.data.model.Member;
@@ -10,15 +11,13 @@ import org.jetbrains.annotations.Nullable;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
-import java.io.*;
 import java.security.PublicKey;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Random;
+import java.util.*;
 
 import static com.kma.fitnesssmc.util.Bytes.*;
 import static com.kma.fitnesssmc.util.Constants.*;
@@ -27,14 +26,14 @@ import static com.kma.fitnesssmc.util.RSA.generatePublicKey;
 public class MemberRepository {
     private final SessionManager sessionManager;
 
-    private final File dataStorage;
+    private final FitnessDatabase database;
 
     public MemberRepository(
         @NotNull SessionManager sessionManager,
-        @NotNull File dataStorage
+        @NotNull FitnessDatabase database
     ) {
         this.sessionManager = sessionManager;
-        this.dataStorage = dataStorage;
+        this.database = database;
     }
 
     /**
@@ -61,77 +60,49 @@ public class MemberRepository {
      * @return the new member that was created successfully or NULL when create has failed
      * @throws CardException if card is not connected
      */
-    public @Nullable Member createMember(
+    public boolean createMember(
         @NotNull String fullName,
         @NotNull Date dateOfBirth,
         @NotNull String phoneNumber
     ) throws CardException {
         // Initialization new member
-        String memberID = createMemberID();
+        String memberID = UUID.randomUUID().toString().replace("-", "");
         Date now = Calendar.getInstance().getTime();
-        Member member = new Member();
-
-        member.setID(memberID);
-        member.setFullName(fullName);
-        member.setDateOfBirth(dateOfBirth);
-        member.setPhoneNumber(phoneNumber);
-        member.setExpirationDate(now);
-        member.setRemainingBalance(0L);
-
-        // Parse new member to data bytes
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        String profileData = new String(member.getProfileData());
-        String nowFormatted = dateFormat.format(now);
-        String remainingBalance = String.valueOf(0L);
-        byte[] data = (
-            (char) memberID.length() + memberID
-            + profileData
-            + (char) nowFormatted.length() + nowFormatted
-            + (char) remainingBalance.length() + remainingBalance
-        ).getBytes();
+        Member member = new Member(memberID, fullName, dateOfBirth, phoneNumber, now, 0L);
 
         // Transmit create member command
-        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE, P1_MEMBER, 0x00, data);
+        CommandAPDU createCommand = new CommandAPDU(0x00, INS_CREATE, P1_MEMBER, 0x00, member.serialize());
         ResponseAPDU createResponse = sessionManager.transmit(createCommand);
 
         if (createResponse.getSW1() != 0x90 || createResponse.getSW2() != 0x00) {
-            return null;
+            return false;
         }
 
-        generateKey(memberID, createResponse.getData());
-        return member;
+        PublicKey publicKey = parsePublicKey(createResponse.getData());
+
+        return publicKey != null && insertPublicKey(memberID, publicKey);
     }
 
-    /**
-     * Generate random ID for member
-     *
-     * @return member ID
-     */
-    private @NotNull String createMemberID() {
-        Random random = new Random();
-        int max = 99999999;
-        int min = 10000000;
-        int memberID = random.nextInt((max - min) + 1) + min;
-
-        return String.valueOf(memberID);
-    }
-
-    private void generateKey(String memberID, byte[] data) {
+    private @Nullable PublicKey parsePublicKey(byte[] data) {
         int offset = 0x00;
         int exponentLength = makeInteger(data, offset);
         int modulusLength = makeInteger(data, offset + 2 + exponentLength);
         byte[] exponentBytes = copyOfRange(data, offset + 2, exponentLength);
         byte[] modulusBytes = copyOfRange(data, offset + 2 + exponentLength + 2, modulusLength);
-        PublicKey publicKey = generatePublicKey(exponentBytes, modulusBytes);
 
-        if (publicKey == null) {
-            return;
-        }
+        return generatePublicKey(exponentBytes, modulusBytes);
+    }
 
-        try (FileWriter fileWriter = new FileWriter(dataStorage, true)) {
-            fileWriter.write(memberID + "#" + toHexString(publicKey.getEncoded()) + "\n");
-        } catch (IOException e) {
+    private boolean insertPublicKey(@NotNull String memberID, @NotNull PublicKey publicKey) {
+        try {
+            database.executeUpdate(
+                "INSERT INTO `members`(`member_id`, `public_key`)"
+                + "VALUES ('" + memberID + "', '" + toHexString(publicKey.getEncoded()) + "')"
+            );
+            return true;
+        } catch (SQLException e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -416,29 +387,12 @@ public class MemberRepository {
     }
 
     private @Nullable PublicKey getPublicKey(String memberID) {
-        try (FileReader fileReader = new FileReader(dataStorage)) {
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-            String line = bufferedReader.readLine();
-            String[] data;
+        try {
+            String query = "SELECT `public_key` FROM `members` WHERE `member_id` = '" + memberID + "'";
+            ResultSet resultSet = database.executeQuery(query);
 
-
-            while (line != null) {
-                if (line.isBlank()) {
-                    continue;
-                }
-
-                data = line.split("#");
-                if (data[0].equals(memberID)) {
-                    bufferedReader.close();
-                    return RSA.generatePublicKey(fromHexString(data[1]));
-                }
-
-                line = bufferedReader.readLine();
-            }
-
-            bufferedReader.close();
-            return null;
-        } catch (IOException e) {
+            return resultSet.next() ? RSA.generatePublicKey(fromHexString(resultSet.getString(1))) : null;
+        } catch (SQLException e) {
             e.printStackTrace();
             return null;
         }
