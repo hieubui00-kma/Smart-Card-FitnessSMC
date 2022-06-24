@@ -273,8 +273,29 @@ public class MemberRepository {
         @NotNull Date dateOfBirth,
         @NotNull String phoneNumber
     ) throws CardException {
+        Member member = getMember();
+
+        if (member == null) {
+            return false;
+        }
+
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
+
+        try {
+            database.executeUpdate(
+                "UPDATE `members`"
+                + "SET "
+                    + "`full_name` = '" + fullName + "', "
+                    + "`date_of_birth` = '" + dateOfBirthFormatted + "', "
+                    + "`phone_number` = '" + phoneNumber + "'"
+                + "WHERE `member_id` = '" + member.getID() + "'"
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
         byte[] data = (
             (char) fullName.length() + fullName +
             (char) dateOfBirthFormatted.length() + dateOfBirthFormatted +
