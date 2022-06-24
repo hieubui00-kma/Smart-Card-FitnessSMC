@@ -228,19 +228,6 @@ public class MemberRepository {
     }
 
     /**
-     * Get member's remaining balance already stored in the connected card
-     *
-     * @return the member's remaining balance has been stored in the card or NULL when member isn't initialized or data is invalid
-     * @throws CardException if card is not connected
-     */
-    public @Nullable Long getRemainingBalance() throws CardException {
-        CommandAPDU getCommand = new CommandAPDU(0x00, INS_GET, P1_MEMBER, P2_REMAINING_BALANCE);
-        ResponseAPDU response = sessionManager.transmit(getCommand);
-
-        return response.getSW1() != 0x90 || response.getSW2() != 0x00 ? null : Long.parseLong(new String(response.getData()));
-    }
-
-    /**
      * Update PIN that already stored in the connected card
      *
      * @param currentPIN the existing PIN stored in the card
@@ -339,21 +326,6 @@ public class MemberRepository {
     }
 
     /**
-     * Update member's remaining balance in the connected card
-     *
-     * @param remainingBalance the new member's remaining balance that will update
-     * @return true when update has successfully otherwise false when update failed
-     * @throws CardException if card is not connected
-     */
-    private boolean updateRemainingBalance(long remainingBalance) throws CardException {
-        byte[] data = String.valueOf(remainingBalance).getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_REMAINING_BALANCE, data);
-        ResponseAPDU response = sessionManager.transmit(updateCommand);
-
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-    }
-
-    /**
      * Recharge the balance for member and save to card
      *
      * @param amount amount want to recharge
@@ -361,9 +333,48 @@ public class MemberRepository {
      * @throws CardException if card is not connected
      */
     public boolean recharge(long amount) throws CardException {
-        Long currentRemainingBalance = getRemainingBalance();
+        Member member = getMember();
 
-        return currentRemainingBalance != null && updateRemainingBalance(currentRemainingBalance + amount);
+        if (member == null) {
+            return false;
+        }
+
+        String memberID = member.getID();
+        try {
+            String query = "SELECT `remaining_balance` FROM `members` WHERE `member_id` = '" + memberID + "'";
+            ResultSet resultSet = database.executeQuery(query);
+
+            return resultSet.next() && updateRemainingBalance(memberID, resultSet.getLong(1) + amount);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Update member's remaining balance in the connected card
+     *
+     * @param remainingBalance the new member's remaining balance that will update
+     * @return true when update has successfully otherwise false when update failed
+     * @throws CardException if card is not connected
+     */
+    private boolean updateRemainingBalance(@NotNull String memberID, long remainingBalance) throws CardException {
+        try {
+            database.executeUpdate(
+                "UPDATE `members`"
+                + "SET `remaining_balance` = " + remainingBalance + " "
+                + "WHERE `member_id` = '" + memberID + "'"
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        byte[] data = String.valueOf(remainingBalance).getBytes();
+        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_REMAINING_BALANCE, data);
+        ResponseAPDU response = sessionManager.transmit(updateCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
     /**
