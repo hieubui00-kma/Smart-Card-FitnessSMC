@@ -310,22 +310,6 @@ public class MemberRepository {
     }
 
     /**
-     * Update member's expiration date in the connected card
-     *
-     * @param date the new member's expiration date that will update
-     * @return true when update has successfully otherwise false when update failed
-     * @throws CardException if card is not connected
-     */
-    private boolean updateExpirationDate(@NotNull Date date) throws CardException {
-        String dateFormat = new SimpleDateFormat("yyyy-MM-dd").format(date);
-        byte[] data = dateFormat.getBytes();
-        CommandAPDU updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_EXPIRATION_DATE, data);
-        ResponseAPDU response = sessionManager.transmit(updateCommand);
-
-        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
-    }
-
-    /**
      * Recharge the balance for member and save to card
      *
      * @param amount amount want to recharge
@@ -410,15 +394,43 @@ public class MemberRepository {
         }
 
         accuracy(member.getID());
-        if (updateRemainingBalance(member.getRemainingBalance() - episodePack.getPrice())) {
-            Calendar calendar = Calendar.getInstance();
 
-            calendar.setTime(member.getExpirationDate());
-            calendar.add(Calendar.MONTH, episodePack.getDuration());
-            return updateExpirationDate(calendar.getTime());
+        long remainingBalance = member.getRemainingBalance() - episodePack.getPrice();
+        Calendar calendar = Calendar.getInstance();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
+        calendar.setTime(member.getExpirationDate());
+        calendar.add(Calendar.MONTH, episodePack.getDuration());
+        try {
+            database.executeUpdate(
+                "UPDATE `members` "
+                + "SET "
+                    + "`remaining_balance` = " + remainingBalance + ", "
+                    + "`expiration_date` = '" + dateFormat.format(calendar.getTime()) + "'"
+                + "WHERE `member_id` = '" + member.getID() + "';"
+            );
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
         }
 
-        return false;
+        byte[] data;
+        CommandAPDU updateCommand;
+        ResponseAPDU response;
+
+        data = String.valueOf(remainingBalance).getBytes();
+        updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_REMAINING_BALANCE, data);
+        response = sessionManager.transmit(updateCommand);
+
+        if (response.getSW1() != 0x90 || response.getSW2() != 0x00) {
+            return false;
+        }
+
+        data = dateFormat.format(calendar.getTime()).getBytes();
+        updateCommand = new CommandAPDU(0x00, INS_UPDATE, P1_MEMBER, P2_EXPIRATION_DATE, data);
+        response = sessionManager.transmit(updateCommand);
+
+        return response.getSW1() == 0x90 && response.getSW2() == 0x00;
     }
 
     private void accuracy(@NotNull String memberID) throws CardException, RuntimeException {
