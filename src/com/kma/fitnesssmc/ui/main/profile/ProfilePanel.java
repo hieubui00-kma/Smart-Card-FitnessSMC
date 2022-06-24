@@ -158,7 +158,7 @@ public class ProfilePanel extends JPanel {
 
         fieldFullName.setBounds(x, y + labelFullName.getHeight() + 8, width, 32);
         fieldFullName.setFont(new Font("Arial", Font.PLAIN, 14));
-        fieldFullName.setMaxLength(32);
+        fieldFullName.setMaxLength(16);
         fieldFullName.setBorder(BorderFactory.createCompoundBorder(
             fieldFullName.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)

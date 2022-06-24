@@ -100,7 +100,7 @@ public class MemberRepository {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         database.executeUpdate(
-            "INSERT INTO `members`(`member_id`, `name`, `date_of_birth`, `phone_number`)"
+            "INSERT INTO `members`(`member_id`, `full_name`, `date_of_birth`, `phone_number`)"
             + "VALUES("
             + "'" + memberID + "', "
             + "'" + fullName  + "', "
