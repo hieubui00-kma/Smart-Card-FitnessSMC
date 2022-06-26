@@ -1,6 +1,6 @@
 package com.kma.fitnesssmc.ui.main.profile;
 
-import com.kma.fitnesssmc.data.manager.FileManager;
+import com.kma.fitnesssmc.data.local.FitnessDatabase;
 import com.kma.fitnesssmc.data.manager.SessionManager;
 import com.kma.fitnesssmc.data.model.Member;
 import com.kma.fitnesssmc.data.repository.MemberRepository;
@@ -78,9 +78,8 @@ public class ProfilePanel extends JPanel {
 
     private void inject() {
         SessionManager sessionManager = SessionManager.getInstance();
-        FileManager fileManager = FileManager.getInstance();
-        File dataStorage = fileManager.getDataStorage();
-        MemberRepository memberRepository = new MemberRepository(sessionManager, dataStorage);
+        FitnessDatabase database = FitnessDatabase.getInstance();
+        MemberRepository memberRepository = new MemberRepository(sessionManager, database);
 
         viewModel = new ProfileViewModel(memberRepository);
     }
@@ -159,7 +158,7 @@ public class ProfilePanel extends JPanel {
 
         fieldFullName.setBounds(x, y + labelFullName.getHeight() + 8, width, 32);
         fieldFullName.setFont(new Font("Arial", Font.PLAIN, 14));
-        fieldFullName.setMaxLength(32);
+        fieldFullName.setMaxLength(16);
         fieldFullName.setBorder(BorderFactory.createCompoundBorder(
             fieldFullName.getBorder(),
             BorderFactory.createEmptyBorder(4, 8, 4, 8)

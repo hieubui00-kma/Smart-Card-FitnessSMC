@@ -19,6 +19,18 @@ public class Member {
 
     private long remainingBalance;
 
+    public Member() {
+    }
+
+    public Member(String ID, String fullName, Date dateOfBirth, String phoneNumber, Date expirationDate, long remainingBalance) {
+        this.ID = ID;
+        this.fullName = fullName;
+        this.dateOfBirth = dateOfBirth;
+        this.phoneNumber = phoneNumber;
+        this.expirationDate = expirationDate;
+        this.remainingBalance = remainingBalance;
+    }
+
     @Override
     public String toString() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -28,14 +40,19 @@ public class Member {
         return "{ID: \"" + ID + "\", fullName: \"" + fullName + "\", dateOfBirth: " + dateOfBirthFormatted + ", phoneNumber: \"" + phoneNumber + "\", expirationDate: " + expirationDateFormatted + "}";
     }
 
-    public byte[] getProfileData() {
+    public byte[] serialize() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String dateOfBirthFormatted = dateFormat.format(dateOfBirth);
-        String data = (char) fullName.length() + fullName
-            + (char) dateOfBirthFormatted.length() + dateOfBirthFormatted
-            + (char) phoneNumber.length() + phoneNumber;
+        String expirationDateFormatted = dateFormat.format(expirationDate);
+        String remainingBalance = String.valueOf(this.remainingBalance);
 
-        return data.getBytes();
+        return ((char) ID.length() + ID
+            + (char) fullName.length() + fullName
+            + (char) dateOfBirthFormatted.length() + dateOfBirthFormatted
+            + (char) phoneNumber.length() + phoneNumber
+            + (char) expirationDateFormatted.length() + expirationDateFormatted
+            + (char) remainingBalance.length() + remainingBalance
+        ).getBytes();
     }
 
     public String getID() {
